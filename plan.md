@@ -14,7 +14,6 @@
 #### Backup nicht in Excel Zelle aber in Ordnernamen -> Hinweis anzeigen "Backup nicht in Excel eingetragen"
 
 ## Mögliche Termine für GGG finden und mit Initiator:in vereinbaren
-### ist Excel Zelle B4 nicht leer aber entspricht nicht dem Format tt.mm.yyyy? -> Hinweis "Datum nicht im richtigen Format (tt.mm.yyyy)"
 ### ist ein Datum in Excel Zelle B4 eingetragen? 
 
 ## Auf Text für Homepage / Social Media / Pressemitteilung warten
@@ -38,3 +37,14 @@
 ###                 BF4, BF18, BF32, BF46 
 ### gefüllt? - Fortschritt anzeigen (Bspl. "3/4")
 
+## Termin für erstes Treffen vereinbaren
+### ist ein Datum in B21 eingetragen?
+
+## Interessent:innen informieren
+### sind die Excel Zellen K4, K18, K32, K46, etc. "WAHR"? - Fortschritt anzeigen (Bspl. "3/4")
+
+## Anwesenheit notieren
+### ist mindestens eine der Zellen M4, M18, M32, M46, etc. "WAHR"?
+
+## Termin für zweites Treffen vereinbaren
+### ist ein Datum in B22 eingetragen?

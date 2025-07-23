@@ -5,6 +5,8 @@ import tkinter as tk
 from tkinter import ttk
 import pandas as pd
 import datetime
+import requests
+from bs4 import BeautifulSoup
 
 # Name der Datei mit den Aufgaben
 AUFGABEN_DATEI = "aufgaben.txt"

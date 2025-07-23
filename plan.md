@@ -1,31 +1,38 @@
 ## Verzeichnis nach Ordnern durchsuchen in deren Name ein Mitarbeiter:innen Name enthalten ist
-### Wenn der Name an erster Stelle steht (Gruppenname (Mitarbeiter:in + andere:r Mitarbeiter:in)) ist es eine primäre Gruppe (der/die Mitarbeiter:in ist in erster Linie für diese Gruppe zuständig)
-### Wenn der Name an zweiter Stelle steht (Gruppenname (andere:r Mitarbeiter:in + Mitarbeiter:in)) ist es eine sekundäre Gruppe (der/die Mitarbeiter:in ist für diese Gruppe mit-zuständig)
+### Wenn der Name an erster Stelle steht ("Gruppenname (Mitarbeiter:in + andere:r Mitarbeiter:in)") ist es eine primäre Gruppe (der/die Mitarbeiter:in ist in erster Linie für diese Gruppe zuständig)
+### Wenn der Name an zweiter Stelle steht ("Gruppenname (andere:r Mitarbeiter:in + Mitarbeiter:in)") ist es eine sekundäre Gruppe (der/die Mitarbeiter:in ist für diese Gruppe mit-zuständig)
+</br></br>
 
 ## Übersicht der Aufgaben und der aktuelle Stand
 ### zuerst prüfen ob im Ordner eine "todo_status.json" Datei ist
 #### wenn nicht: Datei aus "aufgaben.txt" erstellen
 #### wenn Datei im Ordner ist: prüfen ob alle Punkte aus "aufgaben.txt" tatsächlich enthalten sind
+</br></br>
 
 ## Backup Mitarbeiter:in finden
 ### ist im Ordnernamen "+" enthalten?
 ### sind in Excel Zelle B5 2 Namen? (RegEx: mind. 2 Buchstaben, Leerzeichen, nochmal mind. 2 Buchstaben)
 #### Backup nicht in Ordnernamen aber in Excel Zelle -> Hinweis anzeigen "Backup nicht in Ordnernamen"
 #### Backup nicht in Excel Zelle aber in Ordnernamen -> Hinweis anzeigen "Backup nicht in Excel eingetragen"
+</br></br>
 
 ## Mögliche Termine für GGG finden und mit Initiator:in vereinbaren
 ### ist ein Datum in Excel Zelle B4 eingetragen? 
+</br></br>
 
 ## Auf Text für Homepage / Social Media / Pressemitteilung warten
 ### ist im Ordner der Gruppe ein weiterer Ordner enthalten? 
 ### wenn nicht, wie viel Zeit ist seit dem GGG Termin vergangen? 
 #### sind 14 Tage vergangen -> Initiatorin erneut kontaktieren
+</br></br>
 
 ## Öffentlichkeitsarbeit starten
 ### Website: Datum oder "-" in Excel Zelle B29?
+### Website: ist der Gruppenname in "https://www.kibis-hannover.de/selbsthilfegruppen/gruppen-in-gruendung/"? -> Hinweis wenn nur 1 zutrifft
 ### Infokoffer: Datum oder "-" in Excel Zelle B30?
 ### Instagram: Datum oder "-" in Excel Zelle B31?
 ### Pressemitteilung: Datum oder "-" in Excel Zelle B32?
+</br></br>
 
 ## Interessent:innen sammeln (mindestens 4 für erstes Treffen)
 ### sind die Zellen 
@@ -36,15 +43,47 @@
 ###                 AV4, AV18, AV32, AV46,
 ###                 BF4, BF18, BF32, BF46 
 ### gefüllt? - Fortschritt anzeigen (Bspl. "3/4")
+</br></br>
 
 ## Termin für erstes Treffen vereinbaren
 ### ist ein Datum in B21 eingetragen?
+</br></br>
 
-## Interessent:innen informieren
+## Interessent:innen über erstes Treffen informieren
 ### sind die Excel Zellen K4, K18, K32, K46, etc. "WAHR"? - Fortschritt anzeigen (Bspl. "3/4")
+</br></br>
 
 ## Anwesenheit notieren
-### ist mindestens eine der Zellen M4, M18, M32, M46, etc. "WAHR"?
+### ist mindestens eine der Zellen M4, M18, M32, M46, etc. "WAHR"?  
+### ist ein Wert in D21?
+</br></br>
 
 ## Termin für zweites Treffen vereinbaren
 ### ist ein Datum in B22 eingetragen?
+</br></br>
+
+## Interessent:innen über zweites Treffen informieren
+### sind die Excel Zellen K6, K20, K34, M48, etc. "WAHR"? - Fortschritt anzeigen (Bspl. "3/4")
+</br></br>
+
+## Anwesenheit zweites Treffen notieren
+### ist mindestens eine der Zellen M6, M20, M34, M48, etc. "WAHR"?  
+### ist ein Wert in D22?
+</br></br> 
+
+## Initiatorin Fragebogen zukommen lassen
+### ist ein Datum in B56 eingetragen? 
+</br></br>
+
+## Termin für drittes Treffen vereinbaren
+### ist ein Datum in B23 eingetragen?
+</br></br>
+
+## Interessent:innen über drittes Treffen informieren
+### sind die Excel Zellen K8, K22, K36, M50, etc. "WAHR"? - Fortschritt anzeigen (Bspl. "3/4")
+</br></br>
+
+## Anwesenheit zweites Treffen notieren
+### ist mindestens eine der Zellen M8, M22, M36, M50, etc. "WAHR"?  
+### ist ein Wert in D23?
+</br></br> 

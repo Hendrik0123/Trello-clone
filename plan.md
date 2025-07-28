@@ -28,7 +28,8 @@
 
 ## Öffentlichkeitsarbeit starten
 ### Website: Datum oder "-" in Excel Zelle B29?
-### Website: ist der Gruppenname in "https://www.kibis-hannover.de/selbsthilfegruppen/gruppen-in-gruendung/"? -> Hinweis wenn nur 1 zutrifft
+### Website: ist der Gruppenname in "https://www.kibis-hannover.de/selbsthilfegruppen/gruppen-in-gruendung/"? 
+#### Hinweis wenn nur 1 von beidem zutrifft
 ### Infokoffer: Datum oder "-" in Excel Zelle B30?
 ### Instagram: Datum oder "-" in Excel Zelle B31?
 ### Pressemitteilung: Datum oder "-" in Excel Zelle B32?

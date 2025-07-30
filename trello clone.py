@@ -42,7 +42,7 @@ def finde_hendrik_ordner(verzeichnis):
 def backup(Ordnername):
     regex = r"\(\s*[A-Za-z]{2,}\s*\+\s*[A-Za-z]{2,}\s*\)"
     treffer = re.search(regex, Ordnername)
-    eintrag = df.iloc[4, 1]
+    eintrag = df.iloc[5, 1]
     # Prüfung: Wert vorhanden & besteht aus mindestens 2 Wörtern
     if isinstance(eintrag, str) and len(eintrag.strip().split()) >= 2:
         eintrag = True
@@ -57,8 +57,7 @@ def backup(Ordnername):
         print(f"{Ordnername} Backup nicht im Ordnernamen eingetragen!")        
 
 def termin_GGG(Ordnername):
-        global GGG_Termin
-        GGG_Termin = df.iloc[3, 1].date()
+        GGG_Termin = ws["B5"].value.date()
         # Prüfung, ob ein Wert vorhanden ist
         if pd.notna(GGG_Termin):
             i[1] = datetime.now().date()
@@ -71,7 +70,7 @@ def text_warten(Ordnername):
         i[1] = datetime.now().date()
     elif not unterordner: 
         heute = datetime.now().date()
-        
+        GGG_Termin = ws["B5"].value.date()
         if GGG_Termin is None:
             print(f"{Ordnername} Termin GGG nicht in Excel gefunden!")
         zwei_wochen = timedelta(weeks=2)
@@ -95,29 +94,30 @@ def homepage(Ordnername):
     Gruppen_in_Gruendung = get_titles_from_url(os.getenv("url"))
     if Name in Gruppen_in_Gruendung:
         homepage = 1
-        # ist etwas in Zelle B29 eingetragen?  
-        if pd.notna(df.iloc[29, 1]):
-            excel = 1
-        if homepage and excel or df.iloc[29, 1] == "-":
-            i[1] = datetime.now().date()
-        elif not homepage and excel:
-            print(f"Gruppe {Ordnername} nicht auf Homepage gefunden! Stimmen Ordnername und Gruppenname überein?")
-        elif homepage and not excel:
-            print(f"Gruppe {Ordnername} auf Homepage gefunden aber kein Eintrag in Excel vorhanden!")
-        else:
-            print(f"Gruppe {Ordnername} weder auf Homepage noch in Excel gefunden! Bitte prüfen!")
+    # ist etwas in Zelle B29 eingetragen?
+    if pd.notna(df.iloc[27, 1]):
+        excel = 1
+    if homepage and excel or df.iloc[27, 1] == "-":
+        i[1] = datetime.now().date()
+    elif not homepage and excel:
+        print(f"Gruppe {Ordnername} nicht auf Homepage gefunden! Stimmen Ordnername und Gruppenname überein?")
+    elif homepage and not excel:
+        print(f"Gruppe {Ordnername} auf Homepage gefunden aber kein Eintrag in Excel vorhanden!")
+    else:
+        print(f"Gruppe {Ordnername} weder auf Homepage noch in Excel gefunden! Bitte prüfen!")
     
 
 def instagram(Ordnername):
     # ist etwas in Zelle B30 eingetragen?
-    if pd.notna(df.iloc[30, 1]):
+    if pd.notna(df.iloc[29, 1]):
         i[1] = datetime.now().date()
     else:
         print(f"{Ordnername} kein Eintrag in Excel für Instagram vorhanden! (Datum oder '-')")
 
 def presse(Ordnername):
     # ist etwas in Zelle B31 eingetragen?
-    if pd.notna(df.iloc[31, 1]):
+    print(f"Pressemitteilung {df.iloc[30, 0]}")
+    if pd.notna(df.iloc[30, 1]):
         i[1] = datetime.now().date()
     else:
         print(f"{Ordnername} kein Eintrag in Excel für Pressemitteilung vorhanden! (Datum oder '-')")
@@ -139,6 +139,7 @@ def interessenten(Ordnername):
     ]
     anzahl = 0
     heute = datetime.now().date()
+    GGG_Termin = ws["B5"].value.date()
     zwei_monate = timedelta(weeks=2)
     for interessent in excel_namen:
         if pd.notna(df.iloc[interessent]):
@@ -150,14 +151,14 @@ def interessenten(Ordnername):
      
 
 def erstesTreffen(Ordnername):   
-        # Ist ein Datum in Zelle B21 eingetragen?
-        if pd.notna(df.iloc[20, 1]):
-            i[1] = datetime.now().date()
-        else:
-            print(f"{Ordnername} Termin für erstes Treffen vereinbaren!") 
+    # Ist ein Datum in Zelle B21 eingetragen?
+    if pd.notna(df.iloc[19, 1]):
+        i[1] = datetime.now().date()
+    else:
+        print(f"{Ordnername} Termin für erstes Treffen vereinbaren!") 
 
 def konferenzraum1(Ordnername):
-    a = input(f"Wurde der Konferenzraum für das erste Treffen am {df.iloc[20, 1].strftime("%d.%m.%Y")} reserviert? (ja/nein): ").strip().lower()
+    a = input(f"Wurde der Konferenzraum für das erste Treffen am {df.iloc[19, 1].strftime("%d.%m.%Y")} reserviert? (ja/nein): ").strip().lower()
     if a == "ja":
         i[1] = datetime.now().date()
     elif a == "nein":
@@ -203,10 +204,10 @@ def infoTreffen1(Ordnername):
         
 def anwesenheit1(Ordnername):
     # liegt das erste Treffen in der Vergangenheit?
-    if pd.isna(df.iloc[20, 1]):
+    if pd.isna(df.iloc[19, 1]):
         print(f"{Ordnername} Termin für erstes Treffen nicht eingetragen!")
         return
-    erstesTreffen = df.iloc[20, 1].date()
+    erstesTreffen = df.iloc[19, 1].date()
     heute = datetime.now().date()
     checks = False
     anzahl = False
@@ -220,7 +221,7 @@ def anwesenheit1(Ordnername):
     ]
     if erstesTreffen < heute:
         # ist ein Wert in Zelle D21 eingetragen?
-        if pd.notna(df.iloc[20, 3]):
+        if pd.notna(df.iloc[19, 3]):
             anzahl = True
         # ist mindestens eine Anwesenheit bei den Interessent:innen eingetragen?
         for interessent in anwesenheiten:
@@ -240,14 +241,14 @@ def anwesenheit1(Ordnername):
 
 def zweitesTreffen(Ordnername):    
     # Ist ein Datum in Zelle B21 eingetragen?
-    if pd.notna(df.iloc[21, 1]):
+    if pd.notna(df.iloc[20, 1]):
         i[1] = datetime.now().date()
     else:
         print(f"{Ordnername} Termin für erstes Treffen vereinbaren!")
 
         
 def konferenzraum2(Ordnername):
-    a = input(f"Wurde der Konferenzraum für das zweite Treffen am {df.iloc[21, 1].strftime("%d.%m.%Y")} reserviert? (ja/nein): ").strip().lower()
+    a = input(f"Wurde der Konferenzraum für das zweite Treffen am {df.iloc[20, 1].strftime("%d.%m.%Y")} reserviert? (ja/nein): ").strip().lower()
     if a == "ja":
         i[1] = datetime.now().date()
     elif a == "nein":
@@ -287,10 +288,10 @@ def infoTreffen2(Ordnername):
         
 def anwesenheit2(Ordnername):
     # liegt das zweite Treffen in der Vergangenheit?
-    if pd.isna(df.iloc[21, 1]):
+    if pd.isna(df.iloc[20, 1]):
         print(f"{Ordnername} Termin für zweites Treffen nicht eingetragen!")
         return
-    zweitesTreffen = df.iloc[21, 1].date()
+    zweitesTreffen = df.iloc[20, 1].date()
     heute = datetime.now().date()
     checks = False
     anzahl = False
@@ -304,7 +305,7 @@ def anwesenheit2(Ordnername):
     ]
     if zweitesTreffen < heute:
         # ist ein Wert in Zelle D22 eingetragen?
-        if pd.notna(df.iloc[21, 3]):
+        if pd.notna(df.iloc[20, 3]):
             anzahl = True
         # ist mindestens eine Anwesenheit bei den Interessent:innen eingetragen?
         for interessent in anwesenheiten:
@@ -334,13 +335,13 @@ def raumsuche(Ordnername):
     
 def drittesTreffen(Ordnername):
         # Ist ein Datum in Zelle B23 eingetragen?
-    if pd.notna(df.iloc[22, 1]):
+    if pd.notna(df.iloc[21, 1]):
         i[1] = datetime.now().date()
     else:
         print(f"{Ordnername} Termin für drittes Treffen vereinbaren!")
 
 def konferenzraum3(Ordnername):
-    a = input(f"Wurde der Konferenzraum für das dritte Treffen am {df.iloc[22, 1].strftime("%d.%m.%Y")} reserviert? (ja/nein): ").strip().lower()
+    a = input(f"Wurde der Konferenzraum für das dritte Treffen am {df.iloc[21, 1].strftime("%d.%m.%Y")} reserviert? (ja/nein): ").strip().lower()
     if a == "ja":
         i[1] = datetime.now().date()
     elif a == "nein":
@@ -380,17 +381,17 @@ def infoTreffen3(Ordnername):
 
 def fragebogen1(Ordnername):
     #Ist ein Wert in Zelle B56 eingetragen?
-    if pd.notna(df.iloc[55, 1]):
+    if pd.notna(df.iloc[54, 1]):
         i[1] = datetime.now().date()
     else:
         print(f"{Ordnername} Fragebogen an Initiator:in aushändigen!")
 
 def anwesenheit3(Ordnername):
     # liegt das dritte Treffen in der Vergangenheit?
-    if pd.isna(df.iloc[22, 1]):
+    if pd.isna(df.iloc[21, 1]):
         print(f"{Ordnername} Termin für drittes Treffen nicht eingetragen!")
         return
-    drittesTreffen = df.iloc[22, 1].date()
+    drittesTreffen = df.iloc[21, 1].date()
     heute = datetime.now().date()
     checks = False
     anzahl = False
@@ -404,7 +405,7 @@ def anwesenheit3(Ordnername):
     ]
     if drittesTreffen < heute:
         # ist ein Wert in Zelle D23 eingetragen?
-        if pd.notna(df.iloc[22, 3]):
+        if pd.notna(df.iloc[21, 3]):
             anzahl = True
         # ist mindestens eine Anwesenheit bei den Interessent:innen eingetragen?
         for interessent in anwesenheiten:
@@ -424,12 +425,12 @@ def anwesenheit3(Ordnername):
 
 def fragebogen2(Ordnername):
     # Ist ein Wert in Zelle B57 eingetragen?
-    if pd.notna(df.iloc[56, 1]):
+    if pd.notna(df.iloc[55, 1]):
         i[1] = datetime.now().date()
     else:
         print(f"{Ordnername} Fragebogen von Initiator:in noch nicht zurückerhalten!")
         # Sind seit dem Aushändigen des Fragebogens mehr als 2 Wochen vergangen?
-        if datetime.now().date() - df.iloc[55, 1].date() > timedelta(weeks=2):
+        if datetime.now().date() - df.iloc[54, 1].date() > timedelta(weeks=2):
             print("Es sind mehr als 2 Wochen seit dem Aushändigen des Fragebogens vergangen, bitte Initiator:in kontaktieren.")
 
 todo_functions = {"Backup Mitarbeiter:in finden": backup,
@@ -451,6 +452,7 @@ todo_functions = {"Backup Mitarbeiter:in finden": backup,
                   "Initiator:in bei Raumsuche unterstützen": raumsuche,
                   "Termin für drittes Treffen vereinbaren": drittesTreffen,
                   "Konferenzraum Reservieren3": konferenzraum3,
+                  "Interessent:innen informieren3": infoTreffen3,
                   "Initiator:in Fragebogen zukommen lassen": fragebogen1,
                   "Anwesenheiten notieren3": anwesenheit3,
                   "Fragebogen zurückerhalten und in Datenbank einpflegen": fragebogen2
@@ -489,8 +491,9 @@ for Gruppe in Gruppen:
             if i[1] != None:
                 continue
             else:
-                todo_functions[i[0]](Gruppe[0])
-                #break
-    continue
-                
-            
+                todo_functions[i[0]](Gruppe[0])                
+                # JSON-Datei direkt nach der Änderung aktualisieren
+                with open(todo_status_datei, 'w', encoding='utf-8') as f:
+                    json.dump(daten, f, indent=2, ensure_ascii=False, default=str)
+                break
+        continue

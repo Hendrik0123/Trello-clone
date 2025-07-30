@@ -40,7 +40,7 @@ def finde_hendrik_ordner(verzeichnis):
     return ordner
 
 def backup(Ordnername):
-    regex = r"\(\s*[A-Za-z]{2,}\s*\+\s*[A-Za-z]{2,}\s*\)"
+    regex = r"\(\s*[A-Za-z]{2,}\s*(\+|und)\s*[A-Za-z]{2,}\s*\)"
     treffer = re.search(regex, Ordnername)
     eintrag = df.iloc[5, 1]
     # Prüfung: Wert vorhanden & besteht aus mindestens 2 Wörtern
@@ -49,7 +49,6 @@ def backup(Ordnername):
     else:
         eintrag = False  
     if treffer and eintrag:
-        print(f"{Ordnername} Backup ist da!")
         i[1] = datetime.now().date()
     elif treffer and not eintrag:
         print(f"{Ordnername} Backup nicht in Excel eingetragen!")
@@ -124,25 +123,19 @@ def presse(Ordnername):
             
 def interessenten(Ordnername): 
     excel_namen = [
-    # Spalte H (Index 7)
-    (3, 7), (17, 7), (31, 7), (45, 7),
-    # Spalte R (Index 17)
-    (3, 17), (17, 17), (31, 17), (45, 17),
-    # Spalte AB (Index 27)
-    (3, 27), (17, 27), (31, 27), (45, 27),
-    # Spalte AL (Index 37)
-    (3, 37), (17, 37), (31, 37), (45, 37),
-    # Spalte AV (Index 47)
-    (3, 47), (17, 47), (31, 47), (45, 47),
-    # Spalte BF (Index 57)
-    (3, 57), (17, 57), (31, 57), (45, 57),
+    "H4", "H18", "H32", "H46",
+    "R4", "R18", "R32", "R46",
+    "AB4", "AB18", "AB32", "AB46",
+    "AL4", "AL18", "AL32", "AL46",
+    "AV4", "AV18", "AV32", "AV46",
+    "BF4", "BF18", "BF32", "BF46"
     ]
     anzahl = 0
     heute = datetime.now().date()
     GGG_Termin = ws["B5"].value.date()
     zwei_monate = timedelta(weeks=2)
     for interessent in excel_namen:
-        if pd.notna(df.iloc[interessent]):
+        if pd.notna(ws[interessent].value):
             anzahl += 1
     if anzahl >= 4:
         i[1] = datetime.now().date()
@@ -169,17 +162,11 @@ def konferenzraum1(Ordnername):
 
 def infoTreffen1(Ordnername):
     excel_namen = [
-    # Spalte H
     "H4", "H18", "H32", "H46",
-    # Spalte R
     "R4", "R18", "R32", "R46",
-    # Spalte AB
     "AB4", "AB18", "AB32", "AB46",
-    # Spalte AL
     "AL4", "AL18", "AL32", "AL46",
-    # Spalte AV
     "AV4", "AV18", "AV32", "AV46",
-    # Spalte BF
     "BF4", "BF18", "BF32", "BF46",
     ]
     infoCheck = [
@@ -200,7 +187,7 @@ def infoTreffen1(Ordnername):
     if nicht_informiert == []:
         i[1] = datetime.now().date()
     else:
-        print(f"{Ordnername} wurden folgende Interessent:innen über den ersten Termin informiert?: \n-{'\n-'.join(nicht_informiert)} \nes ist kein Haken in der Interessiertenliste gesetzt!")
+        print(f"{Ordnername} wurden folgende Interessent:innen über den ersten Termin am {df.iloc[19, 1].strftime("%d.%m.%Y")} informiert?: \n-{'\n-'.join(nicht_informiert)} \nes ist kein Haken in der Interessiertenliste gesetzt!")
         
 def anwesenheit1(Ordnername):
     # liegt das erste Treffen in der Vergangenheit?
@@ -237,7 +224,7 @@ def anwesenheit1(Ordnername):
         else:
             print(f"{Ordnername} weder Anzahl in Zelle D21 eingetragen noch Anwesenheiten abgehakt!")
     else:
-        print(f"{Ordnername} warten bis erstes Treffen stattgefunden hat!")
+        print(f"{Ordnername} warten bis erstes Treffen am {df.iloc[19, 1].strftime("%d.%m.%Y")} stattgefunden hat!")
 
 def zweitesTreffen(Ordnername):    
     # Ist ein Datum in Zelle B21 eingetragen?
@@ -284,7 +271,7 @@ def infoTreffen2(Ordnername):
     if nicht_informiert == []:
         i[1] = datetime.now().date()
     else:
-        print(f"{Ordnername} wurden folgende Interessent:innen über den zweiten Termin informiert?: \n-{'\n-'.join(nicht_informiert)} \nes ist kein Haken in der Interessiertenliste gesetzt!")
+        print(f"{Ordnername} wurden folgende Interessent:innen über den zweiten Termin am {df.iloc[20, 1].strftime("%d.%m.%Y")}  informiert?: \n-{'\n-'.join(nicht_informiert)} \nes ist kein Haken in der Interessiertenliste gesetzt!")
         
 def anwesenheit2(Ordnername):
     # liegt das zweite Treffen in der Vergangenheit?
@@ -321,7 +308,7 @@ def anwesenheit2(Ordnername):
         else:
             print(f"{Ordnername} weder Anzahl in Zelle D22 eingetragen noch Anwesenheiten abgehakt!")
     else:
-        print(f"{Ordnername} warten bis zweites Treffen stattgefunden hat!")
+        print(f"{Ordnername} warten bis zweites Treffen am {df.iloc[20, 1].strftime("%d.%m.%Y")} stattgefunden hat!")
       
 def raumsuche(Ordnername):
     a = input("Hat die Gruppe einen eigenen Raum für weitere Treffen nach dem dritten Termin? (ja/nein): ").strip().lower()
@@ -377,7 +364,7 @@ def infoTreffen3(Ordnername):
     if nicht_informiert == []:
         i[1] = datetime.now().date()
     else:
-        print(f"{Ordnername} wurden folgende Interessent:innen über den dritten Termin informiert?: \n-{'\n-'.join(nicht_informiert)} \nes ist kein Haken in der Interessiertenliste gesetzt!")
+        print(f"{Ordnername} wurden folgende Interessent:innen über den dritten Termin am {df.iloc[21, 1].strftime("%d.%m.%Y")} informiert?: \n-{'\n-'.join(nicht_informiert)} \nes ist kein Haken in der Interessiertenliste gesetzt!")
 
 def fragebogen1(Ordnername):
     #Ist ein Wert in Zelle B56 eingetragen?
@@ -421,7 +408,7 @@ def anwesenheit3(Ordnername):
         else:
             print(f"{Ordnername} weder Anzahl in Zelle D23 eingetragen noch Anwesenheiten abgehakt!")
     else:
-        print(f"{Ordnername} warten bis drittes Treffen stattgefunden hat!")
+        print(f"{Ordnername} warten bis drittes Treffen am {df.iloc[21, 1].strftime("%d.%m.%Y")} stattgefunden hat!")
 
 def fragebogen2(Ordnername):
     # Ist ein Wert in Zelle B57 eingetragen?
@@ -460,40 +447,69 @@ todo_functions = {"Backup Mitarbeiter:in finden": backup,
 
 Gruppen = finde_hendrik_ordner(VERZEICHNIS)
 
-for Gruppe in Gruppen:
-    datei = list(Path(os.path.join(VERZEICHNIS, Gruppe[0])).glob('GG Verlauf*.xlsx'))
-    if datei:
-        pfad = datei[0]             
-        df = pd.read_excel(pfad)  # Direkt übergeben – pandas versteht Path-Objekte
-        wb = load_workbook(pfad, data_only=True)
-        ws = wb.active
-    else:
-        print(f"{Gruppe[0]} keine Excel-Datei gefunden!")
-        continue
-    # Ist eine "todo_status.json" Datei vorhanden?
-    todo_status_datei = os.path.join(VERZEICHNIS, Gruppe[0], "todo_status.json")
-    if os.path.exists(todo_status_datei):
-        print(f"{Gruppe[0]} todo_status.json vorhanden")
-    else:
-        print(f"{Gruppe[0]} todo_status.json nicht vorhanden, wird erstellt")
-        # Erstelle json Datei aus aufgaben.txt
-        with open(Aufgaben, 'r', encoding='utf-8') as f:
-            zeilen = [zeile.strip() for zeile in f if zeile.strip()]  
-        
-        daten = [[zeile, None] for zeile in zeilen]
-        with open(todo_status_datei, 'w', encoding='utf-8') as f:
-            json.dump(daten, f, indent=2, ensure_ascii=False)    
+def hauptschleife():
+    for Gruppe in Gruppen:
+        print(Gruppe)
+        # Ist eine "todo_status.json" Datei vorhanden?
+        todo_status_datei = os.path.join(VERZEICHNIS, Gruppe[0], "todo_status.json")
+        print("Suche nach Datei:", todo_status_datei)
+        print("Existiert Datei?", os.path.exists(todo_status_datei))
+        if os.path.exists(todo_status_datei):
+            print(f"{Gruppe[0]} todo_status.json vorhanden")
+        else:
+            print(f"{Gruppe[0]} todo_status.json nicht vorhanden, wird erstellt")
+            # Erstelle json Datei aus aufgaben.txt
+            with open(Aufgaben, 'r', encoding='utf-8') as f:
+                zeilen = [zeile.strip() for zeile in f if zeile.strip()]  
             
-    with open(todo_status_datei, 'r', encoding='utf-8') as f:
-        daten = json.load(f)
+            daten = [[zeile, None] for zeile in zeilen]
+            with open(todo_status_datei, 'w', encoding='utf-8') as f:
+                json.dump(daten, f, indent=2, ensure_ascii=False)    
         
-        for i in daten:
-            if i[1] != None:
-                continue
-            else:
-                todo_functions[i[0]](Gruppe[0])                
-                # JSON-Datei direkt nach der Änderung aktualisieren
-                with open(todo_status_datei, 'w', encoding='utf-8') as f:
-                    json.dump(daten, f, indent=2, ensure_ascii=False, default=str)
-                break
-        continue
+        datei = list(Path(os.path.join(VERZEICHNIS, Gruppe[0])).glob('GG Verlauf*.xlsx'))
+        if datei:
+            pfad = datei[0]   
+            global df, wb, ws          
+            df = pd.read_excel(pfad)  # Direkt übergeben – pandas versteht Path-Objekte
+            wb = load_workbook(pfad, data_only=True)
+            ws = wb.active
+        else:
+            print(f"{Gruppe[0]} keine Excel-Datei gefunden!")
+            continue        
+        
+        with open(todo_status_datei, 'r', encoding='utf-8') as f:
+            daten = json.load(f)
+            
+            for i in daten:
+                if i[1] != None:
+                    continue
+                else:
+                    todo_functions[i[0]](Gruppe[0])                
+                    # JSON-Datei direkt nach der Änderung aktualisieren
+                    with open(todo_status_datei, 'w', encoding='utf-8') as f:
+                        json.dump(daten, f, indent=2, ensure_ascii=False, default=str)
+                    break
+            continue
+        
+while __name__ == "__main__":
+    hauptschleife()
+    print("Alle Aufgaben überprüft und aktualisiert.")
+    
+    # Optional: GUI zur Anzeige der Ergebnisse
+    root = tk.Tk()
+    root.title("Aufgabenstatus")
+    
+    tree = ttk.Treeview(root, columns=("Aufgabe", "Status"), show='headings')
+    tree.heading("Aufgabe", text="Aufgabe")
+    tree.heading("Status", text="Status")
+    
+    for Gruppe in Gruppen:
+        todo_status_datei = os.path.join(VERZEICHNIS, Gruppe[0], "todo_status.json")
+        with open(todo_status_datei, 'r', encoding='utf-8') as f:
+            daten = json.load(f)
+            for i in daten:
+                status = "Erledigt" if i[1] else "Offen"
+                tree.insert("", "end", values=(i[0], status))
+    
+    tree.pack(expand=True, fill='both')
+    root.mainloop()

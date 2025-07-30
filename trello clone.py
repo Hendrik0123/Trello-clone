@@ -39,50 +39,34 @@ def finde_hendrik_ordner(verzeichnis):
                     ordner.append((name, "primär"))
     return ordner
 
-
-
 def backup(Ordnername):
-    datei = list(Path(os.path.join(VERZEICHNIS, Ordnername)).glob('GG Verlauf*.xlsx'))
-    if datei:
-        regex = r"\(\s*[A-Za-z]{2,}\s*\+\s*[A-Za-z]{2,}\s*\)"
-        treffer = re.search(regex, Ordnername)
-        pfad = datei[0]
-        df = pd.read_excel(pfad)
-        eintrag = df.iloc[4, 1]
-        # Prüfung: Wert vorhanden & besteht aus mindestens 2 Wörtern
-        if isinstance(eintrag, str) and len(eintrag.strip().split()) >= 2:
-            eintrag = True
-        else:
-            eintrag = False
-                
-        if treffer and eintrag:
-            print(f"{Ordnername} Backup ist da!")
-            i[1] = datetime.now().date()
-        elif treffer and not eintrag:
-            print(f"{Ordnername} Backup nicht in Excel eingetragen!")
-        elif eintrag and not treffer:
-            print(f"{Ordnername} Backup nicht im Ordnernamen eingetragen!")
+    regex = r"\(\s*[A-Za-z]{2,}\s*\+\s*[A-Za-z]{2,}\s*\)"
+    treffer = re.search(regex, Ordnername)
+    eintrag = df.iloc[4, 1]
+    # Prüfung: Wert vorhanden & besteht aus mindestens 2 Wörtern
+    if isinstance(eintrag, str) and len(eintrag.strip().split()) >= 2:
+        eintrag = True
     else:
-        print(f"{Ordnername} keine Excel-Datei gefunden!")
-        
+        eintrag = False  
+    if treffer and eintrag:
+        print(f"{Ordnername} Backup ist da!")
+        i[1] = datetime.now().date()
+    elif treffer and not eintrag:
+        print(f"{Ordnername} Backup nicht in Excel eingetragen!")
+    elif eintrag and not treffer:
+        print(f"{Ordnername} Backup nicht im Ordnernamen eingetragen!")        
 
 def termin_GGG(Ordnername):
-    datei = list(Path(os.path.join(VERZEICHNIS, Ordnername)).glob('GG Verlauf*.xlsx'))
-    if datei:
-        pfad = datei[0]
-        df = pd.read_excel(pfad)  # Direkt übergeben – pandas versteht Path-Objekte
         global GGG_Termin
         GGG_Termin = df.iloc[3, 1].date()
         # Prüfung, ob ein Wert vorhanden ist
         if pd.notna(GGG_Termin):
             i[1] = datetime.now().date()
-    else:
-        print(f"{Ordnername} keine Excel-Datei gefunden!")
         
 def text_warten(Ordnername):
-    pfad = Path(VERZEICHNIS) / Ordnername
+    aktuellerpfad = Path(VERZEICHNIS) / Ordnername
     # Prüfen, ob mindestens ein Unterordner existiert
-    unterordner = any(p.is_dir() for p in pfad.iterdir())
+    unterordner = any(p.is_dir() for p in aktuellerpfad.iterdir())
     if unterordner:
         i[1] = datetime.now().date()
     elif not unterordner: 
@@ -111,14 +95,10 @@ def homepage(Ordnername):
     Gruppen_in_Gruendung = get_titles_from_url(os.getenv("url"))
     if Name in Gruppen_in_Gruendung:
         homepage = 1
-    datei = list(Path(os.path.join(VERZEICHNIS, Ordnername)).glob('GG Verlauf*.xlsx'))
-    if datei:
-        pfad = datei[0]
-        df = pd.read_excel(pfad)  # Direkt übergeben – pandas versteht Path-Objekte  
         # ist etwas in Zelle B29 eingetragen?  
         if pd.notna(df.iloc[29, 1]):
             excel = 1
-        if homepage and excel:
+        if homepage and excel or df.iloc[29, 1] == "-":
             i[1] = datetime.now().date()
         elif not homepage and excel:
             print(f"Gruppe {Ordnername} nicht auf Homepage gefunden! Stimmen Ordnername und Gruppenname überein?")
@@ -126,38 +106,23 @@ def homepage(Ordnername):
             print(f"Gruppe {Ordnername} auf Homepage gefunden aber kein Eintrag in Excel vorhanden!")
         else:
             print(f"Gruppe {Ordnername} weder auf Homepage noch in Excel gefunden! Bitte prüfen!")
-    else:
-        print(f"{Ordnername} keine Excel-Datei gefunden!")
     
 
 def instagram(Ordnername):
-    datei = list(Path(os.path.join(VERZEICHNIS, Ordnername)).glob('GG Verlauf*.xlsx'))
-    if datei:
-        pfad = datei[0]
-        df = pd.read_excel(pfad)  # Direkt übergeben – pandas versteht Path-Objekte
-        # ist etwas in Zelle B30 eingetragen?
-        if pd.notna(df.iloc[30, 1]):
-            i[1] = datetime.now().date()
-        else:
-            print(f"{Ordnername} kein Eintrag in Excel für Instagram vorhanden!")
+    # ist etwas in Zelle B30 eingetragen?
+    if pd.notna(df.iloc[30, 1]):
+        i[1] = datetime.now().date()
     else:
-        print(f"{Ordnername} keine Excel-Datei gefunden!")
+        print(f"{Ordnername} kein Eintrag in Excel für Instagram vorhanden! (Datum oder '-')")
 
 def presse(Ordnername):
-    datei = list(Path(os.path.join(VERZEICHNIS, Ordnername)).glob('GG Verlauf*.xlsx'))
-    if datei:
-        pfad = datei[0]
-        df = pd.read_excel(pfad)  # Direkt übergeben – pandas versteht Path-Objekte
-        # ist etwas in Zelle B31 eingetragen?
-        if pd.notna(df.iloc[31, 1]):
-            i[1] = datetime.now().date()
-        else:
-            print(f"{Ordnername} kein Eintrag in Excel für Pressemitteilung vorhanden!")
+    # ist etwas in Zelle B31 eingetragen?
+    if pd.notna(df.iloc[31, 1]):
+        i[1] = datetime.now().date()
     else:
-        print(f"{Ordnername} keine Excel-Datei gefunden!")
+        print(f"{Ordnername} kein Eintrag in Excel für Pressemitteilung vorhanden! (Datum oder '-')")
             
 def interessenten(Ordnername): 
-    datei = list(Path(os.path.join(VERZEICHNIS, Ordnername)).glob('GG Verlauf*.xlsx'))
     excel_namen = [
     # Spalte H (Index 7)
     (3, 7), (17, 7), (31, 7), (45, 7),
@@ -172,38 +137,27 @@ def interessenten(Ordnername):
     # Spalte BF (Index 57)
     (3, 57), (17, 57), (31, 57), (45, 57),
     ]
-    if datei:
-        pfad = datei[0]
-        df = pd.read_excel(pfad)  # Direkt übergeben – pandas versteht Path-Objekte
-        anzahl = 0
-        heute = datetime.now().date()
-        zwei_monate = timedelta(weeks=2)
-        for interessent in excel_namen:
-            if pd.notna(df.iloc[interessent]):
-                anzahl += 1
-        if anzahl >= 4:
-            i[1] = datetime.now().date()
-        if anzahl < 4 and heute - GGG_Termin > zwei_monate:
-            print(f"Bei Gruppe {Ordnername} ist das Gründungsgespräch mehr als 2 Monate her und es sind weniger als 4 Interessent:innen auf der Liste. Initiator:in bezgl. weiterem Vorgehen kontaktieren.")
-            
-    else:
-        print(f"{Ordnername} keine Excel-Datei gefunden!")      
+    anzahl = 0
+    heute = datetime.now().date()
+    zwei_monate = timedelta(weeks=2)
+    for interessent in excel_namen:
+        if pd.notna(df.iloc[interessent]):
+            anzahl += 1
+    if anzahl >= 4:
+        i[1] = datetime.now().date()
+    if anzahl < 4 and heute - GGG_Termin > zwei_monate:
+        print(f"Bei Gruppe {Ordnername} ist das Gründungsgespräch mehr als 2 Monate her und es sind weniger als 4 Interessent:innen auf der Liste. Initiator:in bezgl. weiterem Vorgehen kontaktieren.")
+     
 
-def erstesTreffen(Ordnername):
-    datei = list(Path(os.path.join(VERZEICHNIS, Ordnername)).glob('GG Verlauf*.xlsx'))
-    if datei:
-        pfad = datei[0]
-        df = pd.read_excel(pfad)  # Direkt übergeben – pandas versteht Path-Objekte    
+def erstesTreffen(Ordnername):   
         # Ist ein Datum in Zelle B21 eingetragen?
         if pd.notna(df.iloc[20, 1]):
             i[1] = datetime.now().date()
         else:
-            print(f"{Ordnername} Termin für erstes Treffen vereinbaren!")
-    else:
-        print(f"{Ordnername} keine Excel-Datei gefunden!")   
+            print(f"{Ordnername} Termin für erstes Treffen vereinbaren!") 
 
-def konferenzraum(Ordnername):
-    a = input("Wurde der Konferenzraum reserviert? (ja/nein): ").strip().lower()
+def konferenzraum1(Ordnername):
+    a = input(f"Wurde der Konferenzraum für das erste Treffen am {df.iloc[20, 1].strftime("%d.%m.%Y")} reserviert? (ja/nein): ").strip().lower()
     if a == "ja":
         i[1] = datetime.now().date()
     elif a == "nein":
@@ -213,7 +167,6 @@ def konferenzraum(Ordnername):
         a = input("Wurde der Konferenzraum reserviert? (ja/nein): ").strip().lower()    
 
 def infoTreffen1(Ordnername):
-    datei = list(Path(os.path.join(VERZEICHNIS, Ordnername)).glob('GG Verlauf*.xlsx'))
     excel_namen = [
     # Spalte H
     "H4", "H18", "H32", "H46",
@@ -236,48 +189,74 @@ def infoTreffen1(Ordnername):
     "AY4", "AY18", "AY32", "AY46",
     "BI4", "BI18", "BI32", "BI46"
     ]
-    if datei:
-        pfad = datei[0]
-        df = pd.read_excel(pfad)  # Direkt übergeben – pandas versteht Path-Objekte
-        wb = load_workbook(pfad, data_only=True)
-        ws = wb.active 
-        nicht_informiert = []
-        infoCount = 0
-        for interessent in excel_namen:
-            print(ws[interessent].value)
-            if ws[interessent].value is not None:
-                if ws[infoCheck[infoCount]].value == False:
-                    nicht_informiert.append(ws[interessent].value)
-                    print(f"{ws[interessent].value} nicht informiert!")
-            print(ws[infoCheck[infoCount]].value)
-            infoCount += 1
-        if nicht_informiert == []:
-            i[1] = datetime.now().date()
-        else:
-            print(f"{Ordnername} folgende Interessent:innen wurden über den ersten Termin NICHT informiert: {', '.join(nicht_informiert)}")
+    nicht_informiert = []
+    infoCount = 0
+    for interessent in excel_namen:
+        if ws[interessent].value is not None:
+            if ws[infoCheck[infoCount]].value == False:
+                nicht_informiert.append(ws[interessent].value)
+        infoCount += 1
+    if nicht_informiert == []:
+        i[1] = datetime.now().date()
     else:
-        print(f"{Ordnername} keine Excel-Datei gefunden!")
+        print(f"{Ordnername} wurden folgende Interessent:innen über den ersten Termin informiert?: {', '.join(nicht_informiert)} es ist kein Haken in der Interessiertenliste gesetzt!")
         
 def anwesenheit1(Ordnername):
-    datei = list(Path(os.path.join(VERZEICHNIS, Ordnername)).glob('GG Verlauf*.xlsx'))
-    if datei:
-        pfad = datei[0]
-        df = pd.read_excel(pfad)  # Direkt übergeben – pandas versteht Path-Objekte
-        # liegt das erste Treffen in der Vergangenheit?
-        erstesTreffen = df.iloc[20, 1].date()
-        heute = datetime.now().date()
-        if erstesTreffen < heute:
-            # ist ein Wert in Zelle D21 eingetragen?
-            if pd.notna(df.iloc[20, 3]):
-                i[1] = datetime.now().date()
-            else:
-                print(f"{Ordnername} Anwesenheiten für erstes Treffen nicht eingetragen!")
+    # liegt das erste Treffen in der Vergangenheit?
+    if pd.isna(df.iloc[20, 1]):
+        print(f"{Ordnername} Termin für erstes Treffen nicht eingetragen!")
+        return
+    erstesTreffen = df.iloc[20, 1].date()
+    heute = datetime.now().date()
+    checks = False
+    anzahl = False
+    anwesenheiten = [
+    "M4", "M18", "M32", "M46",
+    "W4", "W18", "W32", "W46",
+    "AG4", "AG18", "AG32", "AG46",
+    "AQ4", "AQ18", "AQ32", "AQ46",
+    "BA4", "BA18", "BA32", "BA46",
+    "BK4", "BK18", "BK32", "BK46"
+    ]
+    if erstesTreffen < heute:
+        # ist ein Wert in Zelle D21 eingetragen?
+        if pd.notna(df.iloc[20, 3]):
+            anzahl = True
+        # ist mindestens eine Anwesenheit bei den Interessent:innen eingetragen?
+        for interessent in anwesenheiten:
+            if ws[interessent].value is not None:
+                checks = True
+                break
+        if anzahl and checks:
+            i[1] = datetime.now().date()
+        elif anzahl and not checks:
+            print(f"{Ordnername} Anzahl in Zelle D21 eingetragen aber keine Anwesenheiten abgehakt!")
+        elif not anzahl and checks:
+            print(f"{Ordnername} Anwesenheiten abgehakt aber keine Anzahl in Zelle D21 eingetragen!")
         else:
-            print(f"{Ordnername} warten bis erstes Treffen stattgefunden hat!")
+            print(f"{Ordnername} weder Anzahl in Zelle D21 eingetragen noch Anwesenheiten abgehakt!")
     else:
-        print(f"{Ordnername} keine Excel-Datei gefunden!")
-    
+        print(f"{Ordnername} warten bis erstes Treffen stattgefunden hat!")
+
+def zweitesTreffen(Ordnername):    
+    # Ist ein Datum in Zelle B21 eingetragen?
+    if pd.notna(df.iloc[21, 1]):
+        i[1] = datetime.now().date()
+    else:
+        print(f"{Ordnername} Termin für erstes Treffen vereinbaren!")
+
         
+def konferenzraum2(Ordnername):
+    a = input(f"Wurde der Konferenzraum für das zweite Treffen am {df.iloc[21, 1].strftime("%d.%m.%Y")} reserviert? (ja/nein): ").strip().lower()
+    if a == "ja":
+        i[1] = datetime.now().date()
+    elif a == "nein":
+        print(f"{Ordnername} Konferenzraum nicht reserviert!")
+    while a not in ["ja", "nein"]:
+        print("Ungültige Eingabe. Bitte 'ja' oder 'nein' eingeben.")
+        a = input("Wurde der Konferenzraum reserviert? (ja/nein): ").strip().lower()  
+        
+      
 todo_functions = {"Backup Mitarbeiter:in finden": backup,
                   "Mögliche Termine für GGG finden und mit Initiator:in vereinbaren": termin_GGG,
                   "Auf Text für Homepage / Social Media / Pressemitteilung warten": text_warten,
@@ -287,14 +266,25 @@ todo_functions = {"Backup Mitarbeiter:in finden": backup,
                   "Pressemitteilung versenden": presse,
                   "Interessent:innen sammeln": interessenten,
                   "Termin für erstes Treffen vereinbaren": erstesTreffen,
-                  "Konferenzraum Reservieren": konferenzraum,
+                  "Konferenzraum Reservieren1": konferenzraum1,
                   "Interessent:innen informieren1": infoTreffen1,
                   "Anwesenheiten notieren1": anwesenheit1,
-                    }
+                  "Termin für zweites Treffen vereinbaren": zweitesTreffen,
+                  "Konferenzraum Reservieren2": konferenzraum2,
+                }
 
 Gruppen = finde_hendrik_ordner(VERZEICHNIS)
 
 for Gruppe in Gruppen:
+    datei = list(Path(os.path.join(VERZEICHNIS, Gruppe[0])).glob('GG Verlauf*.xlsx'))
+    if datei:
+        pfad = datei[0]             
+        df = pd.read_excel(pfad)  # Direkt übergeben – pandas versteht Path-Objekte
+        wb = load_workbook(pfad, data_only=True)
+        ws = wb.active
+    else:
+        print(f"{Gruppe[0]} keine Excel-Datei gefunden!")
+        continue
     # Ist eine "todo_status.json" Datei vorhanden?
     todo_status_datei = os.path.join(VERZEICHNIS, Gruppe[0], "todo_status.json")
     if os.path.exists(todo_status_datei):

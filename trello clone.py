@@ -17,7 +17,7 @@ warnings.filterwarnings("ignore", category=UserWarning, module="openpyxl")
 Aufgaben = "aufgaben.txt"
 
 # Arbeitsverzeichnis (hier: aktuelles Verzeichnis)
-VERZEICHNIS = "."
+VERZEICHNIS = r"Z:\Gruppen\1_NEUE_GRUPPEN"
 
 letzte_meldungen = {}
 
@@ -511,6 +511,7 @@ Gruppen = finde_hendrik_ordner(VERZEICHNIS)
 def hauptschleife():
     for Gruppe in Gruppen:
         gruppenname = Gruppe[0]
+        print(gruppenname)
         todo_status_datei = os.path.join(VERZEICHNIS, gruppenname, "todo_status.json")
 
         if not os.path.exists(todo_status_datei):

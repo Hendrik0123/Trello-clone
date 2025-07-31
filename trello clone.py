@@ -19,6 +19,8 @@ Aufgaben = "aufgaben.txt"
 # Arbeitsverzeichnis (hier: aktuelles Verzeichnis)
 VERZEICHNIS = "."
 
+letzte_meldungen = {}
+
 def finde_hendrik_ordner(verzeichnis):
     """
     Sucht im angegebenen Verzeichnis nach Ordnern, die 'hendrik' im Namen haben.
@@ -39,10 +41,10 @@ def finde_hendrik_ordner(verzeichnis):
                     ordner.append((name, "primär"))
     return ordner
 
-def backup(Ordnername):
+def backup(Ordnername, i):
     regex = r"\(\s*[A-Za-z]{2,}\s*(\+|und)\s*[A-Za-z]{2,}\s*\)"
     treffer = re.search(regex, Ordnername)
-    eintrag = df.iloc[5, 1]
+    eintrag = ws["B6"].value 
     # Prüfung: Wert vorhanden & besteht aus mindestens 2 Wörtern
     if isinstance(eintrag, str) and len(eintrag.strip().split()) >= 2:
         eintrag = True
@@ -51,17 +53,19 @@ def backup(Ordnername):
     if treffer and eintrag:
         i[1] = datetime.now().date()
     elif treffer and not eintrag:
-        print(f"{Ordnername} Backup nicht in Excel eingetragen!")
+        return f"{Ordnername} Backup nicht in Excel eingetragen!"
     elif eintrag and not treffer:
-        print(f"{Ordnername} Backup nicht im Ordnernamen eingetragen!")        
+        return f"{Ordnername} Backup nicht im Ordnernamen eingetragen!"
 
-def termin_GGG(Ordnername):
+def termin_GGG(Ordnername, i):
         GGG_Termin = ws["B5"].value.date()
         # Prüfung, ob ein Wert vorhanden ist
         if pd.notna(GGG_Termin):
             i[1] = datetime.now().date()
+        else:
+            return f"{Ordnername} Termin für GGG vereinbaren!"
         
-def text_warten(Ordnername):
+def text_warten(Ordnername, i):
     aktuellerpfad = Path(VERZEICHNIS) / Ordnername
     # Prüfen, ob mindestens ein Unterordner existiert
     unterordner = any(p.is_dir() for p in aktuellerpfad.iterdir())
@@ -69,24 +73,24 @@ def text_warten(Ordnername):
         i[1] = datetime.now().date()
     elif not unterordner: 
         heute = datetime.now().date()
-        GGG_Termin = ws["B5"].value.date()
-        if GGG_Termin is None:
-            print(f"{Ordnername} Termin GGG nicht in Excel gefunden!")
         zwei_wochen = timedelta(weeks=2)
+        GGG_Termin = ws["B5"].value.date()
         if heute - GGG_Termin > zwei_wochen:
-            print("Es sind mehr als 2 Wochen seit dem GGG-Termin vergangen, bitte Initiator:in kontaktieren.")
+            return "Es sind mehr als 2 Wochen seit dem GGG-Termin vergangen, bitte Initiator:in bezüglich Beschreibung kontaktieren."
+        else:
+            return f"{Ordnername} warten auf Text für Homepage / Insta / Presse"
 
-def zettel(Ordnername):
+def zettel(Ordnername, i):
     a = input("Wurde der grüne Zettel Brigitte gegeben? (ja/nein): ").strip().lower()
+    while a not in ["ja", "nein"]:
+        print ("Ungültige Eingabe. Bitte 'ja' oder 'nein' eingeben.")
+        a = input("Wurde der grüne Zettel Brigitte gegeben? (ja/nein): ").strip().lower()
     if a == "ja":
         i[1] = datetime.now().date()
     elif a == "nein":
-        print(f"{Ordnername} grünen Zettel nicht gegeben!")
-    while a not in ["ja", "nein"]:
-        print("Ungültige Eingabe. Bitte 'ja' oder 'nein' eingeben.")
-        a = input("Wurde der grüne Zettel Brigitte gegeben? (ja/nein): ").strip().lower()
+        return f"{Ordnername} grünen Zettel nicht Brigitte gegeben!"
         
-def homepage(Ordnername):
+def homepage(Ordnername, i):
     homepage = 0
     excel = 0
     Name = Ordnername.split(" (")[0]
@@ -99,29 +103,28 @@ def homepage(Ordnername):
     if homepage and excel or df.iloc[27, 1] == "-":
         i[1] = datetime.now().date()
     elif not homepage and excel:
-        print(f"Gruppe {Ordnername} nicht auf Homepage gefunden! Stimmen Ordnername und Gruppenname überein?")
+        return f"Gruppe {Ordnername} nicht auf Homepage gefunden! Stimmen Ordnername und Gruppenname überein?"
     elif homepage and not excel:
-        print(f"Gruppe {Ordnername} auf Homepage gefunden aber kein Eintrag in Excel vorhanden!")
+        return f"Gruppe {Ordnername} auf Homepage gefunden aber kein Eintrag in Excel vorhanden!"
     else:
-        print(f"Gruppe {Ordnername} weder auf Homepage noch in Excel gefunden! Bitte prüfen!")
+        return f"Gruppe {Ordnername} weder auf Homepage noch in Excel gefunden! Bitte prüfen!"
     
 
-def instagram(Ordnername):
+def instagram(Ordnername, i):
     # ist etwas in Zelle B30 eingetragen?
     if pd.notna(df.iloc[29, 1]):
         i[1] = datetime.now().date()
     else:
-        print(f"{Ordnername} kein Eintrag in Excel für Instagram vorhanden! (Datum oder '-')")
+        return f"{Ordnername} kein Eintrag in Excel für Instagram vorhanden! (Datum oder '-')"
 
-def presse(Ordnername):
+def presse(Ordnername, i):
     # ist etwas in Zelle B31 eingetragen?
-    print(f"Pressemitteilung {df.iloc[30, 0]}")
     if pd.notna(df.iloc[30, 1]):
         i[1] = datetime.now().date()
     else:
-        print(f"{Ordnername} kein Eintrag in Excel für Pressemitteilung vorhanden! (Datum oder '-')")
+        return f"{Ordnername} kein Eintrag in Excel für Pressemitteilung vorhanden! (Datum oder '-')"
             
-def interessenten(Ordnername): 
+def interessenten(Ordnername, i): 
     excel_namen = [
     "H4", "H18", "H32", "H46",
     "R4", "R18", "R32", "R46",
@@ -140,27 +143,29 @@ def interessenten(Ordnername):
     if anzahl >= 4:
         i[1] = datetime.now().date()
     if anzahl < 4 and heute - GGG_Termin > zwei_monate:
-        print(f"Bei Gruppe {Ordnername} ist das Gründungsgespräch mehr als 2 Monate her und es sind weniger als 4 Interessent:innen auf der Liste. Initiator:in bezgl. weiterem Vorgehen kontaktieren.")
+        return f"Bei Gruppe {Ordnername} ist das Gründungsgespräch mehr als 2 Monate her und es sind weniger als 4 Interessent:innen auf der Liste. Initiator:in bezgl. weiterem Vorgehen kontaktieren."
+    else:
+        return f"Es gibt erst {anzahl}/4 Interessent:innen für ein erstes Treffen"
      
 
-def erstesTreffen(Ordnername):   
+def erstesTreffen(Ordnername, i):   
     # Ist ein Datum in Zelle B21 eingetragen?
     if pd.notna(df.iloc[19, 1]):
         i[1] = datetime.now().date()
     else:
-        print(f"{Ordnername} Termin für erstes Treffen vereinbaren!") 
+        return f"{Ordnername} Termin für erstes Treffen vereinbaren!"
 
-def konferenzraum1(Ordnername):
+def konferenzraum1(Ordnername, i):
     a = input(f"Wurde der Konferenzraum für das erste Treffen am {df.iloc[19, 1].strftime("%d.%m.%Y")} reserviert? (ja/nein): ").strip().lower()
     if a == "ja":
         i[1] = datetime.now().date()
     elif a == "nein":
-        print(f"{Ordnername} Konferenzraum nicht reserviert!")
+        return f"{Ordnername} Konferenzraum nicht reserviert!"
     while a not in ["ja", "nein"]:
         print("Ungültige Eingabe. Bitte 'ja' oder 'nein' eingeben.")
         a = input("Wurde der Konferenzraum reserviert? (ja/nein): ").strip().lower()    
 
-def infoTreffen1(Ordnername):
+def infoTreffen1(Ordnername, i):
     excel_namen = [
     "H4", "H18", "H32", "H46",
     "R4", "R18", "R32", "R46",
@@ -187,13 +192,12 @@ def infoTreffen1(Ordnername):
     if nicht_informiert == []:
         i[1] = datetime.now().date()
     else:
-        print(f"{Ordnername} wurden folgende Interessent:innen über den ersten Termin am {df.iloc[19, 1].strftime("%d.%m.%Y")} informiert?: \n-{'\n-'.join(nicht_informiert)} \nes ist kein Haken in der Interessiertenliste gesetzt!")
+        return f"{Ordnername} wurden folgende Interessent:innen über den ersten Termin am {df.iloc[19, 1].strftime("%d.%m.%Y")} informiert?: \n-{'\n-'.join(nicht_informiert)} \nes ist kein Haken in der Interessiertenliste gesetzt!"
         
-def anwesenheit1(Ordnername):
+def anwesenheit1(Ordnername, i):
     # liegt das erste Treffen in der Vergangenheit?
     if pd.isna(df.iloc[19, 1]):
-        print(f"{Ordnername} Termin für erstes Treffen nicht eingetragen!")
-        return
+        return f"{Ordnername} Termin für erstes Treffen nicht eingetragen!"
     erstesTreffen = df.iloc[19, 1].date()
     heute = datetime.now().date()
     checks = False
@@ -218,33 +222,33 @@ def anwesenheit1(Ordnername):
         if anzahl and checks:
             i[1] = datetime.now().date()
         elif anzahl and not checks:
-            print(f"{Ordnername} Anzahl in Zelle D21 eingetragen aber keine Anwesenheiten abgehakt!")
+            return f"{Ordnername} Anzahl in Zelle D21 eingetragen aber keine Anwesenheiten abgehakt!"
         elif not anzahl and checks:
-            print(f"{Ordnername} Anwesenheiten abgehakt aber keine Anzahl in Zelle D21 eingetragen!")
+            return f"{Ordnername} Anwesenheiten abgehakt aber keine Anzahl in Zelle D21 eingetragen!"
         else:
-            print(f"{Ordnername} weder Anzahl in Zelle D21 eingetragen noch Anwesenheiten abgehakt!")
+            return f"{Ordnername} weder Anzahl in Zelle D21 eingetragen noch Anwesenheiten abgehakt!"
     else:
-        print(f"{Ordnername} warten bis erstes Treffen am {df.iloc[19, 1].strftime("%d.%m.%Y")} stattgefunden hat!")
+        return f"{Ordnername} warten bis erstes Treffen am {df.iloc[19, 1].strftime("%d.%m.%Y")} stattgefunden hat!"
 
-def zweitesTreffen(Ordnername):    
+def zweitesTreffen(Ordnername, i):    
     # Ist ein Datum in Zelle B21 eingetragen?
     if pd.notna(df.iloc[20, 1]):
         i[1] = datetime.now().date()
     else:
-        print(f"{Ordnername} Termin für erstes Treffen vereinbaren!")
+        return f"{Ordnername} Termin für erstes Treffen vereinbaren!"
 
         
-def konferenzraum2(Ordnername):
+def konferenzraum2(Ordnername, i):
     a = input(f"Wurde der Konferenzraum für das zweite Treffen am {df.iloc[20, 1].strftime("%d.%m.%Y")} reserviert? (ja/nein): ").strip().lower()
     if a == "ja":
         i[1] = datetime.now().date()
     elif a == "nein":
-        print(f"{Ordnername} Konferenzraum nicht reserviert!")
+        return f"{Ordnername} Konferenzraum nicht reserviert!"
     while a not in ["ja", "nein"]:
         print("Ungültige Eingabe. Bitte 'ja' oder 'nein' eingeben.")
         a = input("Wurde der Konferenzraum reserviert? (ja/nein): ").strip().lower()  
         
-def infoTreffen2(Ordnername):
+def infoTreffen2(Ordnername, i):
     excel_namen = [
     "H4", "H18", "H32", "H46",
     "R4", "R18", "R32", "R46",
@@ -271,13 +275,12 @@ def infoTreffen2(Ordnername):
     if nicht_informiert == []:
         i[1] = datetime.now().date()
     else:
-        print(f"{Ordnername} wurden folgende Interessent:innen über den zweiten Termin am {df.iloc[20, 1].strftime("%d.%m.%Y")}  informiert?: \n-{'\n-'.join(nicht_informiert)} \nes ist kein Haken in der Interessiertenliste gesetzt!")
+        return f"{Ordnername} wurden folgende Interessent:innen über den zweiten Termin am {df.iloc[20, 1].strftime("%d.%m.%Y")}  informiert?: \n-{'\n-'.join(nicht_informiert)} \nes ist kein Haken in der Interessiertenliste gesetzt!"
         
-def anwesenheit2(Ordnername):
+def anwesenheit2(Ordnername, i):
     # liegt das zweite Treffen in der Vergangenheit?
     if pd.isna(df.iloc[20, 1]):
-        print(f"{Ordnername} Termin für zweites Treffen nicht eingetragen!")
-        return
+        return f"{Ordnername} Termin für zweites Treffen nicht eingetragen!"
     zweitesTreffen = df.iloc[20, 1].date()
     heute = datetime.now().date()
     checks = False
@@ -302,42 +305,42 @@ def anwesenheit2(Ordnername):
         if anzahl and checks:
             i[1] = datetime.now().date()
         elif anzahl and not checks:
-            print(f"{Ordnername} Anzahl in Zelle D22 eingetragen aber keine Anwesenheiten abgehakt!")
+            return f"{Ordnername} Anzahl in Zelle D22 eingetragen aber keine Anwesenheiten abgehakt!"
         elif not anzahl and checks:
-            print(f"{Ordnername} Anwesenheiten abgehakt aber keine Anzahl in Zelle D22 eingetragen!")
+            return f"{Ordnername} Anwesenheiten abgehakt aber keine Anzahl in Zelle D22 eingetragen!"
         else:
-            print(f"{Ordnername} weder Anzahl in Zelle D22 eingetragen noch Anwesenheiten abgehakt!")
+            return f"{Ordnername} weder Anzahl in Zelle D22 eingetragen noch Anwesenheiten abgehakt!"
     else:
-        print(f"{Ordnername} warten bis zweites Treffen am {df.iloc[20, 1].strftime("%d.%m.%Y")} stattgefunden hat!")
+        return f"{Ordnername} warten bis zweites Treffen am {df.iloc[20, 1].strftime("%d.%m.%Y")} stattgefunden hat!"
       
-def raumsuche(Ordnername):
+def raumsuche(Ordnername, i):
     a = input("Hat die Gruppe einen eigenen Raum für weitere Treffen nach dem dritten Termin? (ja/nein): ").strip().lower()
+    while a not in ["ja", "nein"]:
+        print("Ungültige Eingabe. Bitte 'ja' oder 'nein' eingeben.")
+        a = input("Wurde der Konferenzraum reserviert? (ja/nein): ").strip().lower()   
     if a == "ja":
         i[1] = datetime.now().date()
     elif a == "nein":
-        print(f"{Ordnername} Es muss ein Raum für weitere Treffen gefunden werden!")
-    while a not in ["ja", "nein"]:
-        print("Ungültige Eingabe. Bitte 'ja' oder 'nein' eingeben.")
-        a = input("Wurde der Konferenzraum reserviert? (ja/nein): ").strip().lower()             
+        return f"{Ordnername} Es muss ein Raum für weitere Treffen gefunden werden!"          
     
-def drittesTreffen(Ordnername):
+def drittesTreffen(Ordnername, i):
         # Ist ein Datum in Zelle B23 eingetragen?
     if pd.notna(df.iloc[21, 1]):
         i[1] = datetime.now().date()
     else:
-        print(f"{Ordnername} Termin für drittes Treffen vereinbaren!")
+        return f"{Ordnername} Termin für drittes Treffen vereinbaren!"
 
-def konferenzraum3(Ordnername):
+def konferenzraum3(Ordnername, i):
     a = input(f"Wurde der Konferenzraum für das dritte Treffen am {df.iloc[21, 1].strftime("%d.%m.%Y")} reserviert? (ja/nein): ").strip().lower()
+    while a not in ["ja", "nein"]:
+        print("Ungültige Eingabe. Bitte 'ja' oder 'nein' eingeben.")
+        a = input("Wurde der Konferenzraum reserviert? (ja/nein): ").strip().lower() 
     if a == "ja":
         i[1] = datetime.now().date()
     elif a == "nein":
-        print(f"{Ordnername} Konferenzraum nicht reserviert!")
-    while a not in ["ja", "nein"]:
-        print("Ungültige Eingabe. Bitte 'ja' oder 'nein' eingeben.")
-        a = input("Wurde der Konferenzraum reserviert? (ja/nein): ").strip().lower()  
+        return f"{Ordnername} Konferenzraum nicht reserviert!" 
 
-def infoTreffen3(Ordnername):
+def infoTreffen3(Ordnername, i):
     excel_namen = [
     "H4", "H18", "H32", "H46",
     "R4", "R18", "R32", "R46",
@@ -364,19 +367,19 @@ def infoTreffen3(Ordnername):
     if nicht_informiert == []:
         i[1] = datetime.now().date()
     else:
-        print(f"{Ordnername} wurden folgende Interessent:innen über den dritten Termin am {df.iloc[21, 1].strftime("%d.%m.%Y")} informiert?: \n-{'\n-'.join(nicht_informiert)} \nes ist kein Haken in der Interessiertenliste gesetzt!")
+        return f"{Ordnername} wurden folgende Interessent:innen über den dritten Termin am {df.iloc[21, 1].strftime("%d.%m.%Y")} informiert?: \n-{'\n-'.join(nicht_informiert)} \nes ist kein Haken in der Interessiertenliste gesetzt!"
 
-def fragebogen1(Ordnername):
+def fragebogen1(Ordnername, i):
     #Ist ein Wert in Zelle B56 eingetragen?
     if pd.notna(df.iloc[54, 1]):
         i[1] = datetime.now().date()
     else:
-        print(f"{Ordnername} Fragebogen an Initiator:in aushändigen!")
+        return f"{Ordnername} Fragebogen an Initiator:in aushändigen!"
 
-def anwesenheit3(Ordnername):
+def anwesenheit3(Ordnername, i):
     # liegt das dritte Treffen in der Vergangenheit?
     if pd.isna(df.iloc[21, 1]):
-        print(f"{Ordnername} Termin für drittes Treffen nicht eingetragen!")
+        return f"{Ordnername} Termin für drittes Treffen nicht eingetragen!"
         return
     drittesTreffen = df.iloc[21, 1].date()
     heute = datetime.now().date()
@@ -402,23 +405,81 @@ def anwesenheit3(Ordnername):
         if anzahl and checks:
             i[1] = datetime.now().date()
         elif anzahl and not checks:
-            print(f"{Ordnername} Anzahl in Zelle D23 eingetragen aber keine Anwesenheiten abgehakt!")
+            return f"{Ordnername} Anzahl in Zelle D23 eingetragen aber keine Anwesenheiten abgehakt!"
         elif not anzahl and checks:
-            print(f"{Ordnername} Anwesenheiten abgehakt aber keine Anzahl in Zelle D23 eingetragen!")
+            return f"{Ordnername} Anwesenheiten abgehakt aber keine Anzahl in Zelle D23 eingetragen!"
         else:
-            print(f"{Ordnername} weder Anzahl in Zelle D23 eingetragen noch Anwesenheiten abgehakt!")
+            return f"{Ordnername} weder Anzahl in Zelle D23 eingetragen noch Anwesenheiten abgehakt!"
     else:
-        print(f"{Ordnername} warten bis drittes Treffen am {df.iloc[21, 1].strftime("%d.%m.%Y")} stattgefunden hat!")
+        return f"{Ordnername} warten bis drittes Treffen am {df.iloc[21, 1].strftime("%d.%m.%Y")} stattgefunden hat!"
 
-def fragebogen2(Ordnername):
+def fragebogen2(Ordnername, i):
     # Ist ein Wert in Zelle B57 eingetragen?
     if pd.notna(df.iloc[55, 1]):
         i[1] = datetime.now().date()
     else:
-        print(f"{Ordnername} Fragebogen von Initiator:in noch nicht zurückerhalten!")
+        return f"{Ordnername} Fragebogen von Initiator:in noch nicht zurückerhalten!"
         # Sind seit dem Aushändigen des Fragebogens mehr als 2 Wochen vergangen?
         if datetime.now().date() - df.iloc[54, 1].date() > timedelta(weeks=2):
-            print("Es sind mehr als 2 Wochen seit dem Aushändigen des Fragebogens vergangen, bitte Initiator:in kontaktieren.")
+            return "Es sind mehr als 2 Wochen seit dem Aushändigen des Fragebogens vergangen, bitte Initiator:in kontaktieren."
+
+root = tk.Tk()
+root.title("Aufgabenstatus")
+
+frame = tk.Frame(root)
+frame.pack(expand=True, fill='both')
+
+baum_pro_gruppe = {}
+
+def update_gui():
+    for widget in frame.winfo_children():
+        widget.destroy()
+
+    hauptschleife()  # Aufgaben prüfen
+
+    for Gruppe in Gruppen:
+        gruppenname = Gruppe[0]
+        todo_status_datei = os.path.join(VERZEICHNIS, gruppenname, "todo_status.json")
+        
+        if not os.path.exists(todo_status_datei):
+            continue
+
+        # Neuer Frame pro Gruppe (damit Titel + Tabelle zusammenbleiben)
+        gruppen_frame = tk.Frame(frame, borderwidth=1, relief="solid", padx=5, pady=5)
+        gruppen_frame.pack(side="left", expand=True, fill='both', padx=5, pady=5)
+
+        label = tk.Label(gruppen_frame, text=gruppenname, font=("Arial", 12, "bold"))
+        label.pack()
+
+        tree = ttk.Treeview(gruppen_frame, columns=("Aufgabe", "Status"), show="headings", height=20)
+        tree.heading("Aufgabe", text="Aufgabe")
+        tree.heading("Status", text="Status")
+        tree.column("Aufgabe", width=150)
+        tree.column("Status", width=80)
+        tree.pack(expand=True, fill='both')
+
+        with open(todo_status_datei, 'r', encoding='utf-8') as f:
+            daten = json.load(f)
+            for eintrag in daten:
+                status = "✅Erledigt" if eintrag[1] else "Offen"
+                tree.insert("", "end", values=(eintrag[0], status))
+
+        baum_pro_gruppe[gruppenname] = tree
+
+        # === Rückmeldung anzeigen, falls vorhanden ===
+        meldung = letzte_meldungen.get(gruppenname, "")
+        if meldung:
+            meldungs_label = tk.Label(
+                gruppen_frame,
+                text=meldung,
+                fg="green",  # Farbe für Erfolgsmeldungen – kann dynamisch angepasst werden
+                wraplength=180,
+                justify="left"
+            )
+            meldungs_label.pack(pady=(5, 0))
+
+    # Wiederhole nach 5 Sekunden
+    root.after(5000, update_gui)
 
 todo_functions = {"Backup Mitarbeiter:in finden": backup,
                   "Mögliche Termine für GGG finden und mit Initiator:in vereinbaren": termin_GGG,
@@ -449,67 +510,47 @@ Gruppen = finde_hendrik_ordner(VERZEICHNIS)
 
 def hauptschleife():
     for Gruppe in Gruppen:
-        print(Gruppe)
-        # Ist eine "todo_status.json" Datei vorhanden?
-        todo_status_datei = os.path.join(VERZEICHNIS, Gruppe[0], "todo_status.json")
-        print("Suche nach Datei:", todo_status_datei)
-        print("Existiert Datei?", os.path.exists(todo_status_datei))
-        if os.path.exists(todo_status_datei):
-            print(f"{Gruppe[0]} todo_status.json vorhanden")
-        else:
-            print(f"{Gruppe[0]} todo_status.json nicht vorhanden, wird erstellt")
-            # Erstelle json Datei aus aufgaben.txt
+        gruppenname = Gruppe[0]
+        todo_status_datei = os.path.join(VERZEICHNIS, gruppenname, "todo_status.json")
+
+        if not os.path.exists(todo_status_datei):
+            print(f"{gruppenname} todo_status.json nicht vorhanden, wird erstellt")
             with open(Aufgaben, 'r', encoding='utf-8') as f:
-                zeilen = [zeile.strip() for zeile in f if zeile.strip()]  
-            
+                zeilen = [zeile.strip() for zeile in f if zeile.strip()]
             daten = [[zeile, None] for zeile in zeilen]
             with open(todo_status_datei, 'w', encoding='utf-8') as f:
-                json.dump(daten, f, indent=2, ensure_ascii=False)    
+                json.dump(daten, f, indent=2, ensure_ascii=False)
         
-        datei = list(Path(os.path.join(VERZEICHNIS, Gruppe[0])).glob('GG Verlauf*.xlsx'))
+        datei = list(Path(os.path.join(VERZEICHNIS, gruppenname)).glob('GG Verlauf*.xlsx'))
         if datei:
-            pfad = datei[0]   
-            global df, wb, ws          
-            df = pd.read_excel(pfad)  # Direkt übergeben – pandas versteht Path-Objekte
+            pfad = datei[0]
+            global df, wb, ws
+            df = pd.read_excel(pfad)
             wb = load_workbook(pfad, data_only=True)
             ws = wb.active
         else:
-            print(f"{Gruppe[0]} keine Excel-Datei gefunden!")
-            continue        
-        
+            print(f"{gruppenname} keine Excel-Datei gefunden!")
+            continue
+
         with open(todo_status_datei, 'r', encoding='utf-8') as f:
             daten = json.load(f)
-            
-            for i in daten:
-                if i[1] != None:
-                    continue
-                else:
-                    todo_functions[i[0]](Gruppe[0])                
-                    # JSON-Datei direkt nach der Änderung aktualisieren
-                    with open(todo_status_datei, 'w', encoding='utf-8') as f:
-                        json.dump(daten, f, indent=2, ensure_ascii=False, default=str)
-                    break
-            continue
+
+        meldung = ""  # Rückgabewert der Funktion
+
+        for i in daten:
+            if i[1] is not None:
+                continue
+            else:
+                meldung = todo_functions[i[0]](gruppenname, i)  # Funktion liefert Text zurück
+                with open(todo_status_datei, 'w', encoding='utf-8') as f:
+                    json.dump(daten, f, indent=2, ensure_ascii=False, default=str)
+                break
+
+        letzte_meldungen[gruppenname] = meldung  # Merken für die GUI
         
 while __name__ == "__main__":
-    hauptschleife()
-    print("Alle Aufgaben überprüft und aktualisiert.")
-    
-    # Optional: GUI zur Anzeige der Ergebnisse
-    root = tk.Tk()
-    root.title("Aufgabenstatus")
-    
-    tree = ttk.Treeview(root, columns=("Aufgabe", "Status"), show='headings')
-    tree.heading("Aufgabe", text="Aufgabe")
-    tree.heading("Status", text="Status")
-    
-    for Gruppe in Gruppen:
-        todo_status_datei = os.path.join(VERZEICHNIS, Gruppe[0], "todo_status.json")
-        with open(todo_status_datei, 'r', encoding='utf-8') as f:
-            daten = json.load(f)
-            for i in daten:
-                status = "Erledigt" if i[1] else "Offen"
-                tree.insert("", "end", values=(i[0], status))
-    
-    tree.pack(expand=True, fill='both')
+    # Starte initiales Update
+    update_gui()
+
+    # Starte Hauptloop
     root.mainloop()

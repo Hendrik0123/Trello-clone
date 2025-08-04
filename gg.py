@@ -24,6 +24,9 @@ def get_titles_from_url(url):
         if h3:
             a_tag = h3.find("a", title=True)
             if a_tag:
+                a_tag["title"] = a_tag["title"].replace(",", "")
+                a_tag["title"] = a_tag["title"].replace("?", "")
+                print(f"Homepage Name: {a_tag['title']}")
                 title_list.append(a_tag['title'])
 
     return title_list

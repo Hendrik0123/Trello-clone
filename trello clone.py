@@ -143,7 +143,7 @@ def interessenten(Ordnername, i):
     if anzahl >= 4:
         i[1] = datetime.now().date()
     if anzahl < 4 and heute - GGG_Termin > zwei_monate:
-        return f"Bei Gruppe {Ordnername} ist das Gründungsgespräch mehr als 2 Monate her und es sind weniger als 4 Interessent:innen auf der Liste. Initiator:in bezgl. weiterem Vorgehen kontaktieren."
+        return f"Bei Gruppe {Ordnername} ist das Gründungsgespräch mehr als 2 Monate her und es sind weniger als 4 ({anzahl} Personen) Interessent:innen auf der Liste. Initiator:in bezgl. weiterem Vorgehen kontaktieren."
     else:
         return f"Es gibt erst {anzahl}/4 Interessent:innen für ein erstes Treffen"
      
@@ -439,6 +439,8 @@ def update_gui():
 
     for Gruppe in Gruppen:
         gruppenname = Gruppe[0]
+        Titel = gruppenname.split(" (")[0]
+        MA = f"({gruppenname.split(" (")[1]}"
         todo_status_datei = os.path.join(VERZEICHNIS, gruppenname, "todo_status.json")
         
         if not os.path.exists(todo_status_datei):
@@ -448,7 +450,7 @@ def update_gui():
         gruppen_frame = tk.Frame(frame, borderwidth=1, relief="solid", padx=5, pady=5)
         gruppen_frame.pack(side="left", expand=True, fill='both', padx=5, pady=5)
 
-        label = tk.Label(gruppen_frame, text=gruppenname, font=("Arial", 12, "bold"))
+        label = tk.Label(gruppen_frame, text=f"{Titel}\n{MA}", font=("Arial", 12, "bold"))
         label.pack()
 
         tree = ttk.Treeview(gruppen_frame, columns=("Aufgabe", "Status"), show="headings", height=20)
@@ -478,8 +480,8 @@ def update_gui():
             )
             meldungs_label.pack(pady=(5, 0))
 
-    # Wiederhole nach 5 Sekunden
-    root.after(5000, update_gui)
+    # Wiederhole nach 10 Minuten
+    root.after(600000, update_gui)
 
 todo_functions = {"Backup Mitarbeiter:in finden": backup,
                   "Mögliche Termine für GGG finden und mit Initiator:in vereinbaren": termin_GGG,

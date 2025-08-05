@@ -53,9 +53,9 @@ def backup(Ordnername, i):
     if treffer and eintrag:
         i[1] = datetime.now().date()
     elif treffer and not eintrag:
-        return f"{Ordnername} Backup nicht in Excel eingetragen!"
+        return "Backup nicht in Excel eingetragen!"
     elif eintrag and not treffer:
-        return f"{Ordnername} Backup nicht im Ordnernamen eingetragen!"
+        return "Backup nicht im Ordnernamen eingetragen!"
 
 def termin_GGG(Ordnername, i):
         GGG_Termin = ws["B5"].value.date()
@@ -63,7 +63,7 @@ def termin_GGG(Ordnername, i):
         if pd.notna(GGG_Termin):
             i[1] = datetime.now().date()
         else:
-            return f"{Ordnername} Termin für GGG vereinbaren!"
+            return "Termin für GGG vereinbaren!"
         
 def text_warten(Ordnername, i):
     aktuellerpfad = Path(VERZEICHNIS) / Ordnername
@@ -76,9 +76,9 @@ def text_warten(Ordnername, i):
         zwei_wochen = timedelta(weeks=2)
         GGG_Termin = ws["B5"].value.date()
         if heute - GGG_Termin > zwei_wochen:
-            return "Es sind mehr als 2 Wochen seit dem GGG-Termin vergangen, bitte Initiator:in bezüglich Beschreibung kontaktieren."
+            return "Es sind mehr als 2 Wochen seit dem GGG-Termin vergangen, bitte Initiator:in bzgl. Beschreibung kontaktieren."
         else:
-            return f"{Ordnername} warten auf Text für Homepage / Insta / Presse"
+            return "warten auf Text für Homepage / Insta / Presse"
 
 def zettel(Ordnername, i):
     a = input("Wurde der grüne Zettel Brigitte gegeben? (ja/nein): ").strip().lower()
@@ -88,7 +88,7 @@ def zettel(Ordnername, i):
     if a == "ja":
         i[1] = datetime.now().date()
     elif a == "nein":
-        return f"{Ordnername} grünen Zettel nicht Brigitte gegeben!"
+        return "grünen Zettel nicht Brigitte gegeben!"
         
 def homepage(Ordnername, i):
     homepage = 0
@@ -103,11 +103,11 @@ def homepage(Ordnername, i):
     if homepage and excel or df.iloc[27, 1] == "-":
         i[1] = datetime.now().date()
     elif not homepage and excel:
-        return f"Gruppe {Ordnername} nicht auf Homepage gefunden! Stimmen Ordnername und Gruppenname überein?"
+        return "Gruppe nicht auf Homepage gefunden! Stimmen Ordnername und Gruppenname überein?"
     elif homepage and not excel:
-        return f"Gruppe {Ordnername} auf Homepage gefunden aber kein Eintrag in Excel vorhanden!"
+        return "Gruppe auf Homepage gefunden aber kein Eintrag in Excel vorhanden!"
     else:
-        return f"Gruppe {Ordnername} weder auf Homepage noch in Excel gefunden! Bitte prüfen!"
+        return "Gruppe weder auf Homepage noch in Excel gefunden! Bitte prüfen!"
     
 
 def instagram(Ordnername, i):
@@ -115,14 +115,14 @@ def instagram(Ordnername, i):
     if pd.notna(df.iloc[29, 1]):
         i[1] = datetime.now().date()
     else:
-        return f"{Ordnername} kein Eintrag in Excel für Instagram vorhanden! (Datum oder '-')"
+        return "kein Eintrag in Excel für Instagram vorhanden! (Datum oder '-')"
 
 def presse(Ordnername, i):
     # ist etwas in Zelle B31 eingetragen?
     if pd.notna(df.iloc[30, 1]):
         i[1] = datetime.now().date()
     else:
-        return f"{Ordnername} kein Eintrag in Excel für Pressemitteilung vorhanden! (Datum oder '-')"
+        return "kein Eintrag in Excel für Pressemitteilung vorhanden! (Datum oder '-')"
             
 def interessenten(Ordnername, i): 
     excel_namen = [
@@ -143,9 +143,9 @@ def interessenten(Ordnername, i):
     if anzahl >= 4:
         i[1] = datetime.now().date()
     if anzahl < 4 and heute - GGG_Termin > zwei_monate:
-        return f"Bei Gruppe {Ordnername} ist das Gründungsgespräch mehr als 2 Monate her und es sind weniger als 4 ({anzahl} Personen) Interessent:innen auf der Liste. Initiator:in bezgl. weiterem Vorgehen kontaktieren."
+        return f"Das Gründungsgespräch ist mehr als 2 Monate her und es sind weniger als 4 ({anzahl} Personen) Interessent:innen auf der Liste. Initiator:in bzgl. weiterem Vorgehen kontaktieren."
     else:
-        return f"Es gibt erst {anzahl}/4 Interessent:innen für ein erstes Treffen"
+        return f"Es gibt {anzahl}/4 Interessent:innen für ein erstes Treffen. Warten bis sich min. 4 gemeldet haben."
      
 
 def erstesTreffen(Ordnername, i):   
@@ -153,14 +153,14 @@ def erstesTreffen(Ordnername, i):
     if pd.notna(df.iloc[19, 1]):
         i[1] = datetime.now().date()
     else:
-        return f"{Ordnername} Termin für erstes Treffen vereinbaren!"
+        return "Termin für erstes Treffen vereinbaren!"
 
 def konferenzraum1(Ordnername, i):
     a = input(f"Wurde der Konferenzraum für das erste Treffen am {df.iloc[19, 1].strftime("%d.%m.%Y")} reserviert? (ja/nein): ").strip().lower()
     if a == "ja":
         i[1] = datetime.now().date()
     elif a == "nein":
-        return f"{Ordnername} Konferenzraum nicht reserviert!"
+        return "Konferenzraum nicht reserviert!"
     while a not in ["ja", "nein"]:
         print("Ungültige Eingabe. Bitte 'ja' oder 'nein' eingeben.")
         a = input("Wurde der Konferenzraum reserviert? (ja/nein): ").strip().lower()    
@@ -192,12 +192,12 @@ def infoTreffen1(Ordnername, i):
     if nicht_informiert == []:
         i[1] = datetime.now().date()
     else:
-        return f"{Ordnername} wurden folgende Interessent:innen über den ersten Termin am {df.iloc[19, 1].strftime("%d.%m.%Y")} informiert?: \n-{'\n-'.join(nicht_informiert)} \nes ist kein Haken in der Interessiertenliste gesetzt!"
+        return f"wurden folgende Interessent:innen über den ersten Termin am {df.iloc[19, 1].strftime("%d.%m.%Y")} informiert?: \n-{'\n-'.join(nicht_informiert)} \nes ist kein Haken in der Interessiertenliste gesetzt!"
         
 def anwesenheit1(Ordnername, i):
     # liegt das erste Treffen in der Vergangenheit?
     if pd.isna(df.iloc[19, 1]):
-        return f"{Ordnername} Termin für erstes Treffen nicht eingetragen!"
+        return "Termin für erstes Treffen nicht eingetragen!"
     erstesTreffen = df.iloc[19, 1].date()
     heute = datetime.now().date()
     checks = False
@@ -222,20 +222,20 @@ def anwesenheit1(Ordnername, i):
         if anzahl and checks:
             i[1] = datetime.now().date()
         elif anzahl and not checks:
-            return f"{Ordnername} Anzahl in Zelle D21 eingetragen aber keine Anwesenheiten abgehakt!"
+            return "Anzahl in Zelle D21 eingetragen aber keine Anwesenheiten abgehakt!"
         elif not anzahl and checks:
-            return f"{Ordnername} Anwesenheiten abgehakt aber keine Anzahl in Zelle D21 eingetragen!"
+            return "Anwesenheiten abgehakt aber keine Anzahl in Zelle D21 eingetragen!"
         else:
-            return f"{Ordnername} weder Anzahl in Zelle D21 eingetragen noch Anwesenheiten abgehakt!"
+            return "weder Anzahl in Zelle D21 eingetragen noch Anwesenheiten abgehakt!"
     else:
-        return f"{Ordnername} warten bis erstes Treffen am {df.iloc[19, 1].strftime("%d.%m.%Y")} stattgefunden hat!"
+        return f"warten bis erstes Treffen am {df.iloc[19, 1].strftime("%d.%m.%Y")} stattgefunden hat!"
 
 def zweitesTreffen(Ordnername, i):    
     # Ist ein Datum in Zelle B21 eingetragen?
     if pd.notna(df.iloc[20, 1]):
         i[1] = datetime.now().date()
     else:
-        return f"{Ordnername} Termin für erstes Treffen vereinbaren!"
+        return "Termin für zweites Treffen vereinbaren!"
 
         
 def konferenzraum2(Ordnername, i):
@@ -243,7 +243,7 @@ def konferenzraum2(Ordnername, i):
     if a == "ja":
         i[1] = datetime.now().date()
     elif a == "nein":
-        return f"{Ordnername} Konferenzraum nicht reserviert!"
+        return "Konferenzraum nicht reserviert!"
     while a not in ["ja", "nein"]:
         print("Ungültige Eingabe. Bitte 'ja' oder 'nein' eingeben.")
         a = input("Wurde der Konferenzraum reserviert? (ja/nein): ").strip().lower()  
@@ -275,12 +275,12 @@ def infoTreffen2(Ordnername, i):
     if nicht_informiert == []:
         i[1] = datetime.now().date()
     else:
-        return f"{Ordnername} wurden folgende Interessent:innen über den zweiten Termin am {df.iloc[20, 1].strftime("%d.%m.%Y")}  informiert?: \n-{'\n-'.join(nicht_informiert)} \nes ist kein Haken in der Interessiertenliste gesetzt!"
+        return f"wurden folgende Interessent:innen über den zweiten Termin am {df.iloc[20, 1].strftime("%d.%m.%Y")}  informiert?: \n-{'\n-'.join(nicht_informiert)} \nes ist kein Haken in der Interessiertenliste gesetzt!"
         
 def anwesenheit2(Ordnername, i):
     # liegt das zweite Treffen in der Vergangenheit?
     if pd.isna(df.iloc[20, 1]):
-        return f"{Ordnername} Termin für zweites Treffen nicht eingetragen!"
+        return f"Termin für zweites Treffen nicht eingetragen!"
     zweitesTreffen = df.iloc[20, 1].date()
     heute = datetime.now().date()
     checks = False
@@ -305,13 +305,13 @@ def anwesenheit2(Ordnername, i):
         if anzahl and checks:
             i[1] = datetime.now().date()
         elif anzahl and not checks:
-            return f"{Ordnername} Anzahl in Zelle D22 eingetragen aber keine Anwesenheiten abgehakt!"
+            return "Anzahl in Zelle D22 eingetragen aber keine Anwesenheiten abgehakt!"
         elif not anzahl and checks:
-            return f"{Ordnername} Anwesenheiten abgehakt aber keine Anzahl in Zelle D22 eingetragen!"
+            return "Anwesenheiten abgehakt aber keine Anzahl in Zelle D22 eingetragen!"
         else:
-            return f"{Ordnername} weder Anzahl in Zelle D22 eingetragen noch Anwesenheiten abgehakt!"
+            return "weder Anzahl in Zelle D22 eingetragen noch Anwesenheiten abgehakt!"
     else:
-        return f"{Ordnername} warten bis zweites Treffen am {df.iloc[20, 1].strftime("%d.%m.%Y")} stattgefunden hat!"
+        return f"warten bis zweites Treffen am {df.iloc[20, 1].strftime("%d.%m.%Y")} stattgefunden hat!"
       
 def raumsuche(Ordnername, i):
     a = input("Hat die Gruppe einen eigenen Raum für weitere Treffen nach dem dritten Termin? (ja/nein): ").strip().lower()
@@ -321,14 +321,14 @@ def raumsuche(Ordnername, i):
     if a == "ja":
         i[1] = datetime.now().date()
     elif a == "nein":
-        return f"{Ordnername} Es muss ein Raum für weitere Treffen gefunden werden!"          
+        return "Es muss ein Raum für weitere Treffen gefunden werden!"          
     
 def drittesTreffen(Ordnername, i):
         # Ist ein Datum in Zelle B23 eingetragen?
     if pd.notna(df.iloc[21, 1]):
         i[1] = datetime.now().date()
     else:
-        return f"{Ordnername} Termin für drittes Treffen vereinbaren!"
+        return "Termin für drittes Treffen vereinbaren!"
 
 def konferenzraum3(Ordnername, i):
     a = input(f"Wurde der Konferenzraum für das dritte Treffen am {df.iloc[21, 1].strftime("%d.%m.%Y")} reserviert? (ja/nein): ").strip().lower()
@@ -338,7 +338,7 @@ def konferenzraum3(Ordnername, i):
     if a == "ja":
         i[1] = datetime.now().date()
     elif a == "nein":
-        return f"{Ordnername} Konferenzraum nicht reserviert!" 
+        return "Konferenzraum nicht reserviert!" 
 
 def infoTreffen3(Ordnername, i):
     excel_namen = [
@@ -367,20 +367,19 @@ def infoTreffen3(Ordnername, i):
     if nicht_informiert == []:
         i[1] = datetime.now().date()
     else:
-        return f"{Ordnername} wurden folgende Interessent:innen über den dritten Termin am {df.iloc[21, 1].strftime("%d.%m.%Y")} informiert?: \n-{'\n-'.join(nicht_informiert)} \nes ist kein Haken in der Interessiertenliste gesetzt!"
+        return f"wurden folgende Interessent:innen über den dritten Termin am {df.iloc[21, 1].strftime("%d.%m.%Y")} informiert?: \n-{'\n-'.join(nicht_informiert)} \nes ist kein Haken in der Interessiertenliste gesetzt!"
 
 def fragebogen1(Ordnername, i):
     #Ist ein Wert in Zelle B56 eingetragen?
     if pd.notna(df.iloc[54, 1]):
         i[1] = datetime.now().date()
     else:
-        return f"{Ordnername} Fragebogen an Initiator:in aushändigen!"
+        return "Fragebogen an Initiator:in aushändigen!"
 
 def anwesenheit3(Ordnername, i):
     # liegt das dritte Treffen in der Vergangenheit?
     if pd.isna(df.iloc[21, 1]):
-        return f"{Ordnername} Termin für drittes Treffen nicht eingetragen!"
-        return
+        return "Termin für drittes Treffen nicht eingetragen!"
     drittesTreffen = df.iloc[21, 1].date()
     heute = datetime.now().date()
     checks = False
@@ -405,23 +404,23 @@ def anwesenheit3(Ordnername, i):
         if anzahl and checks:
             i[1] = datetime.now().date()
         elif anzahl and not checks:
-            return f"{Ordnername} Anzahl in Zelle D23 eingetragen aber keine Anwesenheiten abgehakt!"
+            return "Anzahl in Zelle D23 eingetragen aber keine Anwesenheiten abgehakt!"
         elif not anzahl and checks:
-            return f"{Ordnername} Anwesenheiten abgehakt aber keine Anzahl in Zelle D23 eingetragen!"
+            return "Anwesenheiten abgehakt aber keine Anzahl in Zelle D23 eingetragen!"
         else:
-            return f"{Ordnername} weder Anzahl in Zelle D23 eingetragen noch Anwesenheiten abgehakt!"
+            return "weder Anzahl in Zelle D23 eingetragen noch Anwesenheiten abgehakt!"
     else:
-        return f"{Ordnername} warten bis drittes Treffen am {df.iloc[21, 1].strftime("%d.%m.%Y")} stattgefunden hat!"
+        return f"warten bis drittes Treffen am {df.iloc[21, 1].strftime("%d.%m.%Y")} stattgefunden hat!"
 
 def fragebogen2(Ordnername, i):
     # Ist ein Wert in Zelle B57 eingetragen?
     if pd.notna(df.iloc[55, 1]):
         i[1] = datetime.now().date()
+    # Sind seit dem Aushändigen des Fragebogens mehr als 2 Wochen vergangen?
+    elif datetime.now().date() - df.iloc[54, 1].date() > timedelta(weeks=2):
+        return "Es sind mehr als 2 Wochen seit dem Aushändigen des Fragebogens vergangen, bitte Initiator:in kontaktieren."
     else:
-        return f"{Ordnername} Fragebogen von Initiator:in noch nicht zurückerhalten!"
-        # Sind seit dem Aushändigen des Fragebogens mehr als 2 Wochen vergangen?
-        if datetime.now().date() - df.iloc[54, 1].date() > timedelta(weeks=2):
-            return "Es sind mehr als 2 Wochen seit dem Aushändigen des Fragebogens vergangen, bitte Initiator:in kontaktieren."
+        return "Fragebogen von Initiator:in noch nicht zurückerhalten!"
 
 root = tk.Tk()
 root.title("Aufgabenstatus")
@@ -480,9 +479,6 @@ def update_gui():
             )
             meldungs_label.pack(pady=(5, 0))
 
-    # Wiederhole nach 10 Minuten
-    root.after(600000, update_gui)
-
 todo_functions = {"Backup Mitarbeiter:in finden": backup,
                   "Mögliche Termine für GGG finden und mit Initiator:in vereinbaren": termin_GGG,
                   "Auf Text für Homepage / Social Media / Pressemitteilung warten": text_warten,
@@ -539,7 +535,7 @@ def hauptschleife():
             daten = json.load(f)
 
         meldung = ""  # Rückgabewert der Funktion
-
+        
         for i in daten:
             if i[1] is not None:
                 continue
@@ -547,7 +543,8 @@ def hauptschleife():
                 meldung = todo_functions[i[0]](gruppenname, i)  # Funktion liefert Text zurück
                 with open(todo_status_datei, 'w', encoding='utf-8') as f:
                     json.dump(daten, f, indent=2, ensure_ascii=False, default=str)
-                break
+                if meldung:
+                    break                        
 
         letzte_meldungen[gruppenname] = meldung  # Merken für die GUI
         

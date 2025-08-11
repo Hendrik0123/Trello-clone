@@ -142,7 +142,7 @@ def interessenten(Ordnername, i):
             anzahl += 1
     if anzahl >= 4:
         i[1] = datetime.now().date()
-    if anzahl < 4 and heute - GGG_Termin > zwei_monate:
+    elif anzahl < 4 and heute - GGG_Termin > zwei_monate:
         return f"Das Gründungsgespräch ist mehr als 2 Monate her und es sind weniger als 4 ({anzahl} Personen) Interessent:innen auf der Liste. Initiator:in bzgl. weiterem Vorgehen kontaktieren."
     else:
         return f"Es gibt {anzahl}/4 Interessent:innen für ein erstes Treffen. Warten bis sich min. 4 gemeldet haben."

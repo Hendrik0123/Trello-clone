@@ -9,10 +9,8 @@ from openpyxl import load_workbook
 from datetime import datetime, timedelta
 from gg import get_titles_from_url
 import warnings
-
-
+# Unterdrücke Warnungen von openpyxl, die nicht relevant sind
 warnings.filterwarnings("ignore", category=UserWarning, module="openpyxl")
-
 
 Aufgaben = "aufgaben.txt"
 

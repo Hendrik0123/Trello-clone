@@ -40,7 +40,7 @@ def finde_hendrik_ordner(verzeichnis):
     return ordner
 
 def backup(Ordnername, i):
-    regex = r"\(\s*[A-Za-z]{2,}\s*(\+|und)\s*[A-Za-z]{2,}\s*\)"
+    regex = r"\(\s*[A-Za-z]{2,}\s*(\+|und|\&)\s*[A-Za-z]{2,}\s*\)"
     treffer = re.search(regex, Ordnername)
     eintrag = ws["B6"].value 
     # Prüfung: Wert vorhanden & besteht aus mindestens 2 Wörtern

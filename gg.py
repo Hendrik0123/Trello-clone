@@ -30,11 +30,3 @@ def get_titles_from_url(url):
                 title_list.append(a_tag['title'])
 
     return title_list
-
-# Beispielnutzung
-if __name__ == "__main__":
-    url = os.getenv("url")
-    titles = get_titles_from_url(url)
-    print("Gefundene Gruppen:")
-    for title in titles:
-        print("-", title)

@@ -1,4 +1,33 @@
 import os
+import importlib
+import subprocess
+import sys
+
+# Importiere fehlende Pakete bei Bedarf
+def install_and_import(package, import_as=None):
+    try:
+        return importlib.import_module(import_as or package)
+    except ImportError:
+        print(f"{package} nicht gefunden. Installiere...")
+        subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+        return importlib.import_module(import_as or package)
+
+# --- Nur externe Pakete prüfen ---
+pd = install_and_import("pandas")
+openpyxl = install_and_import("openpyxl")
+requests = install_and_import("requests")
+bs4 = install_and_import("beautifulsoup4", "bs4")
+dotenv = install_and_import("python-dotenv", "dotenv")
+
+# Optional: tkinter (manchmal fehlt es auf Linux)
+try:
+    import tkinter as tk
+    from tkinter import ttk
+except ImportError:
+    print("tkinter nicht gefunden. Unter Linux evtl. installieren mit: sudo apt install python3-tk")
+    tk = None
+    ttk = None
+
 from pathlib import Path
 import re
 import json
@@ -9,34 +38,86 @@ from openpyxl import load_workbook
 from datetime import datetime, timedelta
 from gg import get_titles_from_url
 import warnings
+
 # Unterdrücke Warnungen von openpyxl, die nicht relevant sind
 warnings.filterwarnings("ignore", category=UserWarning, module="openpyxl")
 
 Aufgaben = "aufgaben.txt"
 
 # Arbeitsverzeichnis (hier: aktuelles Verzeichnis)
-VERZEICHNIS = r"Z:\Gruppen\1_NEUE_GRUPPEN"
+VERZEICHNIS = r"."
 
 letzte_meldungen = {}
 
-def finde_hendrik_ordner(verzeichnis):
+def finde_ordner_nach_namen(verzeichnis):
     """
-    Sucht im angegebenen Verzeichnis nach Ordnern, die 'hendrik' im Namen haben.
+    Sucht im angegebenen Verzeichnis nach Ordnern, die Namen innerhalb von Klammern enthalten.
+    Der Benutzer wählt anschließend, nach welchem Namen gefiltert werden soll.
     Gibt eine Liste von Tupeln (Ordnername, Typ) zurück.
     Typ ist 'primär' oder 'sekundär' (wenn ein '+' im Namensteil steht).
     """
     ordner = []
-    muster = re.compile(r"\([^\)]*hendrik", re.IGNORECASE)
+    namen_gefunden = set()
+    muster = re.compile(r"\(([^)]+)\)", re.IGNORECASE)
+
+    # Alle Ordner durchsuchen und Namen sammeln
     for name in os.listdir(verzeichnis):
         pfad = os.path.join(verzeichnis, name)
         if os.path.isdir(pfad):
             match = muster.search(name)
             if match:
-                zwischen = name[match.start():match.end()]
+                # Namen normalisieren und prüfen
+                gefundene_namen = match.group(1).split("+")
+                for einzelner_name in gefundene_namen:
+                    normalisierter_name = einzelner_name.strip().lower()
+                    if normalisierter_name not in {n.lower() for n in namen_gefunden}:
+                        namen_gefunden.add(normalisierter_name.capitalize())
+
+    # Benutzer zur Auswahl eines Namens auffordern
+    if not namen_gefunden:
+        print("Keine Namen in Klammern gefunden.")
+        return []
+
+    # Tkinter-Fenster für die Auswahl
+    def auswahl_treffen():
+        nonlocal gewaehlter_name
+        gewaehlter_name = auswahl_var.get()
+        auswahl_fenster.quit()  # Beendet den Hauptloop
+
+    gewaehlter_name = None
+    auswahl_fenster = tk.Tk()
+    auswahl_fenster.title("Namen auswählen")
+
+    tk.Label(auswahl_fenster, text="Bitte einen Namen auswählen:", font=("Arial", 12)).pack(pady=10)
+
+    namen_liste = sorted(namen_gefunden)
+    auswahl_var = tk.StringVar(auswahl_fenster)
+    auswahl_var.set(namen_liste[0])  # Standardwert setzen
+
+    dropdown = ttk.Combobox(auswahl_fenster, textvariable=auswahl_var, values=namen_liste, state="readonly")
+    dropdown.pack(pady=10)
+
+    tk.Button(auswahl_fenster, text="Auswählen", command=auswahl_treffen).pack(pady=10)
+
+    auswahl_fenster.mainloop()  # Startet den Hauptloop
+    auswahl_fenster.destroy()  # Zerstört das Fenster nach dem Beenden des Hauptloops
+
+    if not gewaehlter_name:
+        print("Keine Auswahl getroffen. Abbruch.")
+        return []
+
+    # Ordner nach dem ausgewählten Namen filtern
+    for name in os.listdir(verzeichnis):
+        pfad = os.path.join(verzeichnis, name)
+        if os.path.isdir(pfad):
+            match = muster.search(name)
+            if match and gewaehlter_name.lower() in match.group(1).lower():
+                zwischen = match.group(1)
                 if "+" in zwischen:
                     ordner.append((name, "sekundär"))
                 else:
                     ordner.append((name, "primär"))
+
     return ordner
 
 def backup(Ordnername, i):
@@ -79,15 +160,14 @@ def text_warten(Ordnername, i):
             return "warten auf Text für Homepage / Insta / Presse"
 
 def zettel(Ordnername, i):
-    a = input("Wurde der grüne Zettel Brigitte gegeben? (ja/nein): ").strip().lower()
-    while a not in ["ja", "nein"]:
-        print ("Ungültige Eingabe. Bitte 'ja' oder 'nein' eingeben.")
-        a = input("Wurde der grüne Zettel Brigitte gegeben? (ja/nein): ").strip().lower()
-    if a == "ja":
+    frage_text = "Wurde der grüne Zettel Brigitte gegeben?"
+    antwort = frage_mit_tkinter(frage_text)
+
+    if antwort == "ja":
         i[1] = datetime.now().date()
-    elif a == "nein":
-        return "grünen Zettel nicht Brigitte gegeben!"
-        
+    elif antwort == "nein":
+        return "Grünen Zettel nicht Brigitte gegeben!"
+
 def homepage(Ordnername, i):
     homepage = 0
     excel = 0
@@ -154,14 +234,13 @@ def erstesTreffen(Ordnername, i):
         return "Termin für erstes Treffen vereinbaren!"
 
 def konferenzraum1(Ordnername, i):
-    a = input(f"Wurde der Konferenzraum für das erste Treffen am {df.iloc[19, 1].strftime("%d.%m.%Y")} reserviert? (ja/nein): ").strip().lower()
-    if a == "ja":
+    frage_text = f"Wurde der Konferenzraum für das erste Treffen am {df.iloc[19, 1].strftime('%d.%m.%Y')} reserviert?"
+    antwort = frage_mit_tkinter(frage_text)
+
+    if antwort == "ja":
         i[1] = datetime.now().date()
-    elif a == "nein":
+    elif antwort == "nein":
         return "Konferenzraum nicht reserviert!"
-    while a not in ["ja", "nein"]:
-        print("Ungültige Eingabe. Bitte 'ja' oder 'nein' eingeben.")
-        a = input("Wurde der Konferenzraum reserviert? (ja/nein): ").strip().lower()    
 
 def infoTreffen1(Ordnername, i):
     excel_namen = [
@@ -190,7 +269,7 @@ def infoTreffen1(Ordnername, i):
     if nicht_informiert == []:
         i[1] = datetime.now().date()
     else:
-        return f"wurden folgende Interessent:innen über den ersten Termin am {df.iloc[19, 1].strftime("%d.%m.%Y")} informiert?: \n-{'\n-'.join(nicht_informiert)} \nes ist kein Haken in der Interessiertenliste gesetzt!"
+        return f"wurden folgende Interessent:innen über den ersten Termin am {df.iloc[19, 1].strftime('%d.%m.%Y')} informiert?: \n-{'\n-'.join(nicht_informiert)} \nes ist kein Haken in der Interessiertenliste gesetzt!"
         
 def anwesenheit1(Ordnername, i):
     # liegt das erste Treffen in der Vergangenheit?
@@ -226,7 +305,7 @@ def anwesenheit1(Ordnername, i):
         else:
             return "weder Anzahl in Zelle D21 eingetragen noch Anwesenheiten abgehakt!"
     else:
-        return f"warten bis erstes Treffen am {df.iloc[19, 1].strftime("%d.%m.%Y")} stattgefunden hat!"
+        return f"warten bis erstes Treffen am {df.iloc[19, 1].strftime('%d.%m.%Y')} stattgefunden hat!"
 
 def zweitesTreffen(Ordnername, i):    
     # Ist ein Datum in Zelle B21 eingetragen?
@@ -237,7 +316,7 @@ def zweitesTreffen(Ordnername, i):
 
         
 def konferenzraum2(Ordnername, i):
-    a = input(f"Wurde der Konferenzraum für das zweite Treffen am {df.iloc[20, 1].strftime("%d.%m.%Y")} reserviert? (ja/nein): ").strip().lower()
+    a = input(f"Wurde der Konferenzraum für das zweite Treffen am {df.iloc[20, 1].strftime('%d.%m.%Y')} reserviert? (ja/nein): ").strip().lower()
     if a == "ja":
         i[1] = datetime.now().date()
     elif a == "nein":
@@ -273,7 +352,7 @@ def infoTreffen2(Ordnername, i):
     if nicht_informiert == []:
         i[1] = datetime.now().date()
     else:
-        return f"wurden folgende Interessent:innen über den zweiten Termin am {df.iloc[20, 1].strftime("%d.%m.%Y")}  informiert?: \n-{'\n-'.join(nicht_informiert)} \nes ist kein Haken in der Interessiertenliste gesetzt!"
+        return f"wurden folgende Interessent:innen über den zweiten Termin am {df.iloc[20, 1].strftime('%d.%m.%Y')}  informiert?: \n-{'\n-'.join(nicht_informiert)} \nes ist kein Haken in der Interessiertenliste gesetzt!"
         
 def anwesenheit2(Ordnername, i):
     # liegt das zweite Treffen in der Vergangenheit?
@@ -309,16 +388,15 @@ def anwesenheit2(Ordnername, i):
         else:
             return "weder Anzahl in Zelle D22 eingetragen noch Anwesenheiten abgehakt!"
     else:
-        return f"warten bis zweites Treffen am {df.iloc[20, 1].strftime("%d.%m.%Y")} stattgefunden hat!"
+        return f"warten bis zweites Treffen am {df.iloc[20, 1].strftime('%d.%m.%Y')} stattgefunden hat!"
       
 def raumsuche(Ordnername, i):
-    a = input("Hat die Gruppe einen eigenen Raum für weitere Treffen nach dem dritten Termin? (ja/nein): ").strip().lower()
-    while a not in ["ja", "nein"]:
-        print("Ungültige Eingabe. Bitte 'ja' oder 'nein' eingeben.")
-        a = input("Wurde der Konferenzraum reserviert? (ja/nein): ").strip().lower()   
-    if a == "ja":
+    frage_text = "Hat die Gruppe einen eigenen Raum für weitere Treffen nach dem dritten Termin?"
+    antwort = frage_mit_tkinter(frage_text)
+
+    if antwort == "ja":
         i[1] = datetime.now().date()
-    elif a == "nein":
+    elif antwort == "nein":
         return "Es muss ein Raum für weitere Treffen gefunden werden!"          
     
 def drittesTreffen(Ordnername, i):
@@ -329,7 +407,7 @@ def drittesTreffen(Ordnername, i):
         return "Termin für drittes Treffen vereinbaren!"
 
 def konferenzraum3(Ordnername, i):
-    a = input(f"Wurde der Konferenzraum für das dritte Treffen am {df.iloc[21, 1].strftime("%d.%m.%Y")} reserviert? (ja/nein): ").strip().lower()
+    a = input(f"Wurde der Konferenzraum für das dritte Treffen am {df.iloc[21, 1].strftime('%d.%m.%Y')} reserviert? (ja/nein): ").strip().lower()
     while a not in ["ja", "nein"]:
         print("Ungültige Eingabe. Bitte 'ja' oder 'nein' eingeben.")
         a = input("Wurde der Konferenzraum reserviert? (ja/nein): ").strip().lower() 
@@ -365,7 +443,7 @@ def infoTreffen3(Ordnername, i):
     if nicht_informiert == []:
         i[1] = datetime.now().date()
     else:
-        return f"wurden folgende Interessent:innen über den dritten Termin am {df.iloc[21, 1].strftime("%d.%m.%Y")} informiert?: \n-{'\n-'.join(nicht_informiert)} \nes ist kein Haken in der Interessiertenliste gesetzt!"
+        return f"wurden folgende Interessent:innen über den dritten Termin am {df.iloc[21, 1].strftime('%d.%m.%Y')} informiert?: \n-{'\n-'.join(nicht_informiert)} \nes ist kein Haken in der Interessiertenliste gesetzt!"
 
 def fragebogen1(Ordnername, i):
     #Ist ein Wert in Zelle B56 eingetragen?
@@ -408,7 +486,7 @@ def anwesenheit3(Ordnername, i):
         else:
             return "weder Anzahl in Zelle D23 eingetragen noch Anwesenheiten abgehakt!"
     else:
-        return f"warten bis drittes Treffen am {df.iloc[21, 1].strftime("%d.%m.%Y")} stattgefunden hat!"
+        return f"warten bis drittes Treffen am {df.iloc[21, 1].strftime('%d.%m.%Y')} stattgefunden hat!"
 
 def fragebogen2(Ordnername, i):
     # Ist ein Wert in Zelle B57 eingetragen?
@@ -502,7 +580,7 @@ todo_functions = {"Backup Mitarbeiter:in finden": backup,
                   "Fragebogen zurückerhalten und in Datenbank einpflegen": fragebogen2
                 }
 
-Gruppen = finde_hendrik_ordner(VERZEICHNIS)
+Gruppen = finde_ordner_nach_namen(VERZEICHNIS)
 
 def hauptschleife():
     for Gruppe in Gruppen:
@@ -552,3 +630,35 @@ while __name__ == "__main__":
 
     # Starte Hauptloop
     root.mainloop()
+
+def frage_mit_tkinter(frage_text):
+    """
+    Öffnet ein Tkinter-Fenster mit Buttons für "Ja" und "Nein".
+    Gibt die Antwort ("ja" oder "nein") zurück.
+    """
+    def antwort_ja():
+        nonlocal antwort
+        antwort = "ja"
+        fenster.quit()
+
+    def antwort_nein():
+        nonlocal antwort
+        antwort = "nein"
+        fenster.quit()
+
+    antwort = None
+    fenster = tk.Tk()
+    fenster.title("Abfrage")
+
+    tk.Label(fenster, text=frage_text, font=("Arial", 12)).pack(pady=10)
+
+    button_frame = tk.Frame(fenster)
+    button_frame.pack(pady=10)
+
+    tk.Button(button_frame, text="Ja", command=antwort_ja, width=10).pack(side="left", padx=5)
+    tk.Button(button_frame, text="Nein", command=antwort_nein, width=10).pack(side="right", padx=5)
+
+    fenster.mainloop()
+    fenster.destroy()
+
+    return antwort

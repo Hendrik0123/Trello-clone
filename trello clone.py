@@ -123,6 +123,38 @@ def finde_ordner_nach_namen(verzeichnis):
 
     return ordner
 
+def frage_mit_tkinter(Ordnername, frage_text):
+    """
+    Öffnet ein Tkinter-Fenster mit Buttons für "Ja" und "Nein".
+    Gibt die Antwort ("ja" oder "nein") zurück.
+    """
+    def antwort_ja():
+        nonlocal antwort
+        antwort = "ja"
+        fenster.quit()
+
+    def antwort_nein():
+        nonlocal antwort
+        antwort = "nein"
+        fenster.quit()
+
+    antwort = None
+    fenster = tk.Tk()
+    fenster.title("Abfrage")
+
+    tk.Label(fenster, text=f"{Ordnername}\n{frage_text}", font=("Arial", 12)).pack(pady=10)
+
+    button_frame = tk.Frame(fenster)
+    button_frame.pack(pady=10)
+
+    tk.Button(button_frame, text="Ja", command=antwort_ja, width=10).pack(side="left", padx=5)
+    tk.Button(button_frame, text="Nein", command=antwort_nein, width=10).pack(side="right", padx=5)
+
+    fenster.mainloop()
+    fenster.destroy()
+
+    return antwort
+
 def backup(Ordnername, i):
     regex = r"\(\s*[A-Za-z]{2,}\s*(\+|und|\&)\s*[A-Za-z]{2,}\s*\)"
     treffer = re.search(regex, Ordnername)
@@ -164,7 +196,7 @@ def text_warten(Ordnername, i):
 
 def zettel(Ordnername, i):
     frage_text = "Wurde der grüne Zettel Brigitte gegeben?"
-    antwort = frage_mit_tkinter(frage_text)
+    antwort = frage_mit_tkinter(Ordnername, frage_text)
 
     if antwort == "ja":
         i[1] = datetime.now().date()
@@ -264,7 +296,7 @@ def erstesTreffen(Ordnername, i):
 
 def konferenzraum1(Ordnername, i):
     frage_text = f"Wurde der Konferenzraum für das erste Treffen am {df.iloc[19, 1].strftime('%d.%m.%Y')} reserviert?"
-    antwort = frage_mit_tkinter(frage_text)
+    antwort = frage_mit_tkinter(Ordnername, frage_text)
 
     if antwort == "ja":
         i[1] = datetime.now().date()
@@ -421,7 +453,7 @@ def anwesenheit2(Ordnername, i):
       
 def raumsuche(Ordnername, i):
     frage_text = "Hat die Gruppe einen eigenen Raum für weitere Treffen nach dem dritten Termin?"
-    antwort = frage_mit_tkinter(frage_text)
+    antwort = frage_mit_tkinter(Ordnername, frage_text)
 
     if antwort == "ja":
         i[1] = datetime.now().date()
@@ -659,35 +691,3 @@ while __name__ == "__main__":
 
     # Starte Hauptloop
     root.mainloop()
-
-def frage_mit_tkinter(frage_text):
-    """
-    Öffnet ein Tkinter-Fenster mit Buttons für "Ja" und "Nein".
-    Gibt die Antwort ("ja" oder "nein") zurück.
-    """
-    def antwort_ja():
-        nonlocal antwort
-        antwort = "ja"
-        fenster.quit()
-
-    def antwort_nein():
-        nonlocal antwort
-        antwort = "nein"
-        fenster.quit()
-
-    antwort = None
-    fenster = tk.Tk()
-    fenster.title("Abfrage")
-
-    tk.Label(fenster, text=frage_text, font=("Arial", 12)).pack(pady=10)
-
-    button_frame = tk.Frame(fenster)
-    button_frame.pack(pady=10)
-
-    tk.Button(button_frame, text="Ja", command=antwort_ja, width=10).pack(side="left", padx=5)
-    tk.Button(button_frame, text="Nein", command=antwort_nein, width=10).pack(side="right", padx=5)
-
-    fenster.mainloop()
-    fenster.destroy()
-
-    return antwort

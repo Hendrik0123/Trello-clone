@@ -45,7 +45,7 @@ warnings.filterwarnings("ignore", category=UserWarning, module="openpyxl")
 Aufgaben = "aufgaben.txt"
 
 # Arbeitsverzeichnis (hier: aktuelles Verzeichnis)
-VERZEICHNIS = r"."
+VERZEICHNIS = r"Z:\Gruppen\1_NEUE_GRUPPEN"
 
 letzte_meldungen = {}
 
@@ -67,7 +67,7 @@ def finde_ordner_nach_namen(verzeichnis):
             match = muster.search(name)
             if match:
                 # Namen normalisieren und prüfen
-                gefundene_namen = match.group(1).split("+")
+                gefundene_namen = re.split(r"\+|&|und", match.group(1))  # Trennen bei "+", "&", "und"
                 for einzelner_name in gefundene_namen:
                     normalisierter_name = einzelner_name.strip().lower()
                     if normalisierter_name not in {n.lower() for n in namen_gefunden}:

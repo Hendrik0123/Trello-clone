@@ -36,8 +36,12 @@ from tkinter import ttk
 import pandas as pd
 from openpyxl import load_workbook
 from datetime import datetime, timedelta
-from gg import get_titles_from_url
 import warnings
+from dotenv import load_dotenv
+import requests
+from bs4 import BeautifulSoup
+
+load_dotenv()
 
 # Unterdrücke Warnungen von openpyxl, die nicht relevant sind
 warnings.filterwarnings("ignore", category=UserWarning, module="openpyxl")
@@ -54,7 +58,6 @@ def finde_ordner_nach_namen(verzeichnis):
     Sucht im angegebenen Verzeichnis nach Ordnern, die Namen innerhalb von Klammern enthalten.
     Der Benutzer wählt anschließend, nach welchem Namen gefiltert werden soll.
     Gibt eine Liste von Tupeln (Ordnername, Typ) zurück.
-    Typ ist 'primär' oder 'sekundär' (wenn ein '+' im Namensteil steht).
     """
     ordner = []
     namen_gefunden = set()
@@ -167,6 +170,32 @@ def zettel(Ordnername, i):
         i[1] = datetime.now().date()
     elif antwort == "nein":
         return "Grünen Zettel nicht Brigitte gegeben!"
+
+def get_titles_from_url(url):
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+    except Exception as e:
+        print(f"Fehler beim Abrufen der URL: {e}")
+        return []
+
+    soup = BeautifulSoup(response.text, 'html.parser')
+    title_list = []
+
+    # Finde alle divs mit der Klasse 'header'
+    headers = soup.find_all("div", class_="header")
+    for header in headers:
+        # Suche darin nach <h3><a title="...">
+        h3 = header.find("h3")
+        if h3:
+            a_tag = h3.find("a", title=True)
+            if a_tag:
+                a_tag["title"] = a_tag["title"].replace(",", "")
+                a_tag["title"] = a_tag["title"].replace("?", "")
+                print(f"Homepage Name: {a_tag['title']}")
+                title_list.append(a_tag['title'])
+
+    return title_list
 
 def homepage(Ordnername, i):
     homepage = 0

@@ -644,7 +644,7 @@ def update_gui(show_progress=False):
             remaining = total - done
             progress_bar['maximum'] = total
             progress_bar['value'] = done
-            progress_label.config(text=f"Aktualisiert: {done}/{total} — verbleibend: {remaining}")
+            progress_label.config(text=f"Aktualisiert: {done}/{total} — verbleibend: {remaining}\n {gruppenname}")
             root.update_idletasks()
 
         # Abschlussanzeige kurz zeigen, dann Progress-Widgets entfernen

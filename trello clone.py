@@ -192,7 +192,7 @@ def text_warten(Ordnername, i):
         if heute - GGG_Termin > zwei_wochen:
             return "Es sind mehr als 2 Wochen seit dem GGG-Termin vergangen, bitte Initiator:in bzgl. Beschreibung kontaktieren."
         else:
-            return "warten auf Text für Homepage / Insta / Presse"
+            return "warten auf Text für Homepage / Insta / Presse / Sonstige Kanäle"
 
 def zettel(Ordnername, i):
     frage_text = "Wurde der grüne Zettel Brigitte gegeben?"
@@ -282,9 +282,9 @@ def interessenten(Ordnername, i):
     if anzahl >= 4:
         i[1] = datetime.now().date()
     elif anzahl < 4 and heute - GGG_Termin > zwei_monate:
-        return f"Das Gründungsgespräch ist mehr als 2 Monate her und es sind weniger als 4 ({anzahl} Personen) Interessent:innen auf der Liste. Initiator:in bzgl. weiterem Vorgehen kontaktieren."
+        return f"Das Gründungsgespräch ist mehr als 2 Monate her und es sind weniger als 4 ({anzahl} Personen) Interessent: innen auf der Liste. Initiator: in bzgl. weiterem Vorgehen kontaktieren."
     else:
-        return f"Es gibt {anzahl}/4 Interessent:innen für ein erstes Treffen. Warten bis sich min. 4 gemeldet haben."
+        return f"Es gibt {anzahl}/4 Interessent: innen für ein erstes Treffen. Warten bis sich min. 4 gemeldet haben."
      
 
 def erstesTreffen(Ordnername, i):   
@@ -330,7 +330,7 @@ def infoTreffen1(Ordnername, i):
     if nicht_informiert == []:
         i[1] = datetime.now().date()
     else:
-        return f"wurden folgende Interessent:innen über den ersten Termin am {df.iloc[19, 1].strftime('%d.%m.%Y')} informiert?: \n-{'\n-'.join(nicht_informiert)} \nes ist kein Haken in der Interessiertenliste gesetzt!"
+        return f"wurden folgende Interessent: innen über den ersten Termin am {df.iloc[19, 1].strftime('%d.%m.%Y')} informiert?: \n-{'\n-'.join(nicht_informiert)} \nes ist kein Haken in der Interessiertenliste gesetzt!"
         
 def anwesenheit1(Ordnername, i):
     # liegt das erste Treffen in der Vergangenheit?
@@ -377,14 +377,13 @@ def zweitesTreffen(Ordnername, i):
 
         
 def konferenzraum2(Ordnername, i):
-    a = input(f"Wurde der Konferenzraum für das zweite Treffen am {df.iloc[20, 1].strftime('%d.%m.%Y')} reserviert? (ja/nein): ").strip().lower()
-    if a == "ja":
+    frage_text = f"Wurde der Konferenzraum für das erste Treffen am {df.iloc[20, 1].strftime('%d.%m.%Y')} reserviert?"
+    antwort = frage_mit_tkinter(Ordnername, frage_text)
+
+    if antwort == "ja":
         i[1] = datetime.now().date()
-    elif a == "nein":
+    elif antwort == "nein":
         return "Konferenzraum nicht reserviert!"
-    while a not in ["ja", "nein"]:
-        print("Ungültige Eingabe. Bitte 'ja' oder 'nein' eingeben.")
-        a = input("Wurde der Konferenzraum reserviert? (ja/nein): ").strip().lower()  
         
 def infoTreffen2(Ordnername, i):
     excel_namen = [
@@ -413,7 +412,7 @@ def infoTreffen2(Ordnername, i):
     if nicht_informiert == []:
         i[1] = datetime.now().date()
     else:
-        return f"wurden folgende Interessent:innen über den zweiten Termin am {df.iloc[20, 1].strftime('%d.%m.%Y')}  informiert?: \n-{'\n-'.join(nicht_informiert)} \nes ist kein Haken in der Interessiertenliste gesetzt!"
+        return f"wurden folgende Interessent: innen über den zweiten Termin am {df.iloc[20, 1].strftime('%d.%m.%Y')}  informiert?: \n-{'\n-'.join(nicht_informiert)} \nes ist kein Haken in der Interessiertenliste gesetzt!"
         
 def anwesenheit2(Ordnername, i):
     # liegt das zweite Treffen in der Vergangenheit?
@@ -468,14 +467,13 @@ def drittesTreffen(Ordnername, i):
         return "Termin für drittes Treffen vereinbaren!"
 
 def konferenzraum3(Ordnername, i):
-    a = input(f"Wurde der Konferenzraum für das dritte Treffen am {df.iloc[21, 1].strftime('%d.%m.%Y')} reserviert? (ja/nein): ").strip().lower()
-    while a not in ["ja", "nein"]:
-        print("Ungültige Eingabe. Bitte 'ja' oder 'nein' eingeben.")
-        a = input("Wurde der Konferenzraum reserviert? (ja/nein): ").strip().lower() 
-    if a == "ja":
+    frage_text = f"Wurde der Konferenzraum für das erste Treffen am {df.iloc[21, 1].strftime('%d.%m.%Y')} reserviert?"
+    antwort = frage_mit_tkinter(Ordnername, frage_text)
+
+    if antwort == "ja":
         i[1] = datetime.now().date()
-    elif a == "nein":
-        return "Konferenzraum nicht reserviert!" 
+    elif antwort == "nein":
+        return "Konferenzraum nicht reserviert!"
 
 def infoTreffen3(Ordnername, i):
     excel_namen = [
@@ -504,14 +502,14 @@ def infoTreffen3(Ordnername, i):
     if nicht_informiert == []:
         i[1] = datetime.now().date()
     else:
-        return f"wurden folgende Interessent:innen über den dritten Termin am {df.iloc[21, 1].strftime('%d.%m.%Y')} informiert?: \n-{'\n-'.join(nicht_informiert)} \nes ist kein Haken in der Interessiertenliste gesetzt!"
+        return f"wurden folgende Interessent: innen über den dritten Termin am {df.iloc[21, 1].strftime('%d.%m.%Y')} informiert?: \n-{'\n-'.join(nicht_informiert)} \nes ist kein Haken in der Interessiertenliste gesetzt!"
 
 def fragebogen1(Ordnername, i):
     #Ist ein Wert in Zelle B56 eingetragen?
     if pd.notna(df.iloc[54, 1]):
         i[1] = datetime.now().date()
     else:
-        return "Fragebogen an Initiator:in aushändigen!"
+        return "Fragebogen an Initiator: in aushändigen!"
 
 def anwesenheit3(Ordnername, i):
     # liegt das dritte Treffen in der Vergangenheit?
@@ -555,9 +553,9 @@ def fragebogen2(Ordnername, i):
         i[1] = datetime.now().date()
     # Sind seit dem Aushändigen des Fragebogens mehr als 2 Wochen vergangen?
     elif datetime.now().date() - df.iloc[54, 1].date() > timedelta(weeks=2):
-        return "Es sind mehr als 2 Wochen seit dem Aushändigen des Fragebogens vergangen, bitte Initiator:in kontaktieren."
+        return "Es sind mehr als 2 Wochen seit dem Aushändigen des Fragebogens vergangen, bitte Initiator: in kontaktieren."
     else:
-        return "Fragebogen von Initiator:in noch nicht zurückerhalten!"
+        return "Fragebogen von Initiator: in noch nicht zurückerhalten!"
 
 root = tk.Tk()
 root.title("Aufgabenstatus")
@@ -576,13 +574,13 @@ def update_gui():
     for Gruppe in Gruppen:
         gruppenname = Gruppe[0]
         Titel = gruppenname.split(" (")[0]
-        MA = f"({gruppenname.split(" (")[1]}"
+        MA = f"({gruppenname.split(' (')[1]}" if "(" in gruppenname else ""
         todo_status_datei = os.path.join(VERZEICHNIS, gruppenname, "todo_status.json")
         
         if not os.path.exists(todo_status_datei):
             continue
 
-        # Neuer Frame pro Gruppe (damit Titel + Tabelle zusammenbleiben)
+        # Neuer Frame pro Gruppe
         gruppen_frame = tk.Frame(frame, borderwidth=1, relief="solid", padx=5, pady=5)
         gruppen_frame.pack(side="left", expand=True, fill='both', padx=5, pady=5)
 
@@ -596,25 +594,85 @@ def update_gui():
         tree.column("Status", width=80)
         tree.pack(expand=True, fill='both')
 
-        with open(todo_status_datei, 'r', encoding='utf-8') as f:
-            daten = json.load(f)
-            for eintrag in daten:
-                status = "✅Erledigt" if eintrag[1] else "Offen"
-                tree.insert("", "end", values=(eintrag[0], status))
+        try:
+            with open(todo_status_datei, 'r', encoding='utf-8') as f:
+                daten = json.load(f)
+        except Exception:
+            daten = []
+
+        for eintrag in daten:
+            status = "✅Erledigt" if eintrag[1] else "Offen"
+            tree.insert("", "end", values=(eintrag[0], status))
 
         baum_pro_gruppe[gruppenname] = tree
 
-        # === Rückmeldung anzeigen, falls vorhanden ===
+        # Buttons (binde name + dateipfad als lokale Defaults)
+        button_frame = tk.Frame(gruppen_frame)
+        button_frame.pack(pady=5)
+
+        ueberspringen_name = gruppenname
+        rueckgaengig_name = gruppenname
+        ueberspringen_path = todo_status_datei
+        rueckgaengig_path = todo_status_datei
+
+        ueberspringen_button = tk.Button(
+            button_frame,
+            text="Aktuelles ToDo überspringen",
+            command=lambda n=ueberspringen_name, p=ueberspringen_path: ueberspringen(n, p)
+        )
+        ueberspringen_button.pack(side="left", padx=5)
+
+        rueckgaengig_button = tk.Button(
+            button_frame,
+            text="Vorheriges ToDo rückgängig machen",
+            command=lambda n=rueckgaengig_name, p=rueckgaengig_path: rueckgaengig_machen(n, p)
+        )
+        rueckgaengig_button.pack(side="right", padx=5)
+
+        # Rückmeldung anzeigen, falls vorhanden
         meldung = letzte_meldungen.get(gruppenname, "")
         if meldung:
             meldungs_label = tk.Label(
                 gruppen_frame,
                 text=meldung,
-                fg="green",  # Farbe für Erfolgsmeldungen – kann dynamisch angepasst werden
+                fg="green",
                 wraplength=180,
                 justify="left"
             )
             meldungs_label.pack(pady=(5, 0))
+
+def ueberspringen(ueberspringen_name, todo_status_datei):
+    """Markiert das erste offene ToDo als 'Übersprungen' in der JSON-Datei."""
+    try:
+        with open(todo_status_datei, 'r+', encoding='utf-8') as f:
+            daten = json.load(f)
+            for eintrag in daten:
+                if eintrag[1] is None:
+                    eintrag[1] = "Übersprungen"
+                    break
+            f.seek(0)
+            json.dump(daten, f, indent=2, ensure_ascii=False, default=str)
+            f.truncate()
+    except Exception as e:
+        print(f"Fehler beim Überspringen für {ueberspringen_name}: {e}")
+    # GUI aktualisieren (bindet wieder korrekte lokale Variablen beim Neuaufbau)
+    update_gui()
+
+def rueckgaengig_machen(rueckgaengig_name, todo_status_datei):
+    """Setzt das zuletzt abgeschlossene/übersprungene ToDo zurück auf offen (None)."""
+    try:
+        with open(todo_status_datei, 'r+', encoding='utf-8') as f:
+            daten = json.load(f)
+            for eintrag in reversed(daten):
+                if eintrag[1] is not None:
+                    eintrag[1] = None
+                    break
+            f.seek(0)
+            json.dump(daten, f, indent=2, ensure_ascii=False, default=str)
+            f.truncate()
+    except Exception as e:
+        print(f"Fehler beim Rückgängig machen für {rueckgaengig_name}: {e}")
+    update_gui()
 
 todo_functions = {"Backup Mitarbeiter:in finden": backup,
                   "Mögliche Termine für GGG finden und mit Initiator:in vereinbaren": termin_GGG,

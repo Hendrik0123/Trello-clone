@@ -565,12 +565,99 @@ frame.pack(expand=True, fill='both')
 
 baum_pro_gruppe = {}
 
-def update_gui():
+def update_gui(show_progress=False):
+    # Fensterinhalt leeren
     for widget in frame.winfo_children():
         widget.destroy()
 
-    hauptschleife()  # Aufgaben prüfen
+    # Wenn Progress-Mode, zeige Progress-Widgets und führe Aktualisierung durch
+    if show_progress:
+        progress_frame = tk.Frame(frame, padx=10, pady=10)
+        progress_frame.pack(expand=True, fill='both')
 
+        progress_label = tk.Label(progress_frame, text="Starte Aktualisierung...", font=("Arial", 12))
+        progress_label.pack(pady=(0,10))
+
+        progress_bar = ttk.Progressbar(progress_frame, orient="horizontal", length=400, mode="determinate")
+        progress_bar.pack(pady=(0,10))
+
+        total = len(Gruppen)
+        done = 0
+
+        # Prozess: wie in hauptschleife, aber hier mit Fortschritt und ohne zusätzlichen finalen update-Aufruf
+        for Gruppe in Gruppen:
+            gruppenname = Gruppe[0]
+            todo_status_datei = os.path.join(VERZEICHNIS, gruppenname, "todo_status.json")
+
+            # Erstelle todo_status.json falls nötig
+            if not os.path.exists(todo_status_datei):
+                try:
+                    with open(Aufgaben, 'r', encoding='utf-8') as f:
+                        zeilen = [zeile.strip() for zeile in f if zeile.strip()]
+                    daten = [[zeile, None] for zeile in zeilen]
+                    with open(todo_status_datei, 'w', encoding='utf-8') as f:
+                        json.dump(daten, f, indent=2, ensure_ascii=False)
+                except Exception:
+                    daten = []
+
+            # Excel-Datei laden (setzen globaler df/wb/ws für todo_functions)
+            datei = list(Path(os.path.join(VERZEICHNIS, gruppenname)).glob('GG Verlauf*.xlsx'))
+            if datei:
+                pfad = datei[0]
+                try:
+                    global df, wb, ws
+                    df = pd.read_excel(pfad)
+                    wb = load_workbook(pfad, data_only=True)
+                    ws = wb.active
+                except Exception:
+                    pass
+
+            # JSON lesen und eine Runde durch die Todos laufen
+            try:
+                with open(todo_status_datei, 'r', encoding='utf-8') as f:
+                    daten = json.load(f)
+            except Exception:
+                daten = []
+
+            meldung = ""
+            for i in daten:
+                if i[1] is not None:
+                    continue
+                else:
+                    try:
+                        meldung = todo_functions[i[0]](gruppenname, i)
+                    except Exception as e:
+                        meldung = f"Fehler bei Prüfung: {e}"
+                    # JSON nach jeder Funktion speichern
+                    try:
+                        with open(todo_status_datei, 'w', encoding='utf-8') as f:
+                            json.dump(daten, f, indent=2, ensure_ascii=False, default=str)
+                    except Exception:
+                        pass
+                    if meldung:
+                        break
+
+            letzte_meldungen[gruppenname] = meldung
+
+            # Fortschritt aktualisieren
+            done += 1
+            remaining = total - done
+            progress_bar['maximum'] = total
+            progress_bar['value'] = done
+            progress_label.config(text=f"Aktualisiert: {done}/{total} — verbleibend: {remaining}")
+            root.update_idletasks()
+
+        # Abschlussanzeige kurz zeigen, dann Progress-Widgets entfernen
+        progress_label.config(text="Aktualisierung abgeschlossen.")
+        root.update_idletasks()
+        root.after(300, lambda: None)
+        progress_frame.destroy()
+
+    else:
+        # normaler Pfad: hauptschleife wie bisher ausführen, um letzte Meldungen zu erzeugen
+        hauptschleife()
+
+    # GUI neu aufbauen (Liste der Gruppen anzeigen)
     for Gruppe in Gruppen:
         gruppenname = Gruppe[0]
         Titel = gruppenname.split(" (")[0]
@@ -641,8 +728,109 @@ def update_gui():
             )
             meldungs_label.pack(pady=(5, 0))
 
+def process_all_groups_with_progress(progress_label, progress_bar):
+    """
+    Durchläuft alle Gruppen, führt die gleiche Logik wie in hauptschleife aus
+    und aktualisiert progress_label und progress_bar nach jeder Gruppe.
+    """
+    total = len(Gruppen)
+    done = 0
+
+    for Gruppe in Gruppen:
+        gruppenname = Gruppe[0]
+        todo_status_datei = os.path.join(VERZEICHNIS, gruppenname, "todo_status.json")
+
+        # Erstelle todo_status.json falls nötig (wie in hauptschleife)
+        if not os.path.exists(todo_status_datei):
+            try:
+                with open(Aufgaben, 'r', encoding='utf-8') as f:
+                    zeilen = [zeile.strip() for zeile in f if zeile.strip()]
+                daten = [[zeile, None] for zeile in zeilen]
+                with open(todo_status_datei, 'w', encoding='utf-8') as f:
+                    json.dump(daten, f, indent=2, ensure_ascii=False)
+            except Exception:
+                daten = []
+
+        # Excel-Datei laden (wie in hauptschleife)
+        datei = list(Path(os.path.join(VERZEICHNIS, gruppenname)).glob('GG Verlauf*.xlsx'))
+        if datei:
+            pfad = datei[0]
+            try:
+                # setze globale df/wb/ws damit die todo_functions darauf zugreifen können
+                global df, wb, ws
+                df = pd.read_excel(pfad)
+                wb = load_workbook(pfad, data_only=True)
+                ws = wb.active
+            except Exception:
+                pass
+
+        # JSON lesen und eine Runde durch die Todos laufen (wie in hauptschleife)
+        try:
+            with open(todo_status_datei, 'r', encoding='utf-8') as f:
+                daten = json.load(f)
+        except Exception:
+            daten = []
+
+        meldung = ""
+        for i in daten:
+            if i[1] is not None:
+                continue
+            else:
+                try:
+                    meldung = todo_functions[i[0]](gruppenname, i)
+                except Exception as e:
+                    meldung = f"Fehler bei Prüfung: {e}"
+                # JSON nach jeder Funktion speichern
+                try:
+                    with open(todo_status_datei, 'w', encoding='utf-8') as f:
+                        json.dump(daten, f, indent=2, ensure_ascii=False, default=str)
+                except Exception:
+                    pass
+                if meldung:
+                    break
+
+        letzte_meldungen[gruppenname] = meldung
+
+        # Fortschritt aktualisieren
+        done += 1
+        remaining = total - done
+        progress_bar['maximum'] = total
+        progress_bar['value'] = done
+        progress_label.config(text=f"Aktualisiert: {done}/{total} — verbleibend: {remaining}")
+        # UI-Thread aktualisieren
+        root.update_idletasks()
+
+def show_progress_and_refresh():
+    # Fensterinhalt leeren
+    for w in frame.winfo_children():
+        w.destroy()
+
+    # Progress-Frame anlegen
+    progress_frame = tk.Frame(frame, padx=10, pady=10)
+    progress_frame.pack(expand=True, fill='both')
+
+    progress_label = tk.Label(progress_frame, text="Starte Aktualisierung...", font=("Arial", 12))
+    progress_label.pack(pady=(0,10))
+
+    progress_bar = ttk.Progressbar(progress_frame, orient="horizontal", length=400, mode="determinate")
+    progress_bar.pack(pady=(0,10))
+
+    # Prozess ausführen (synchron, aber UI wird mit update_idletasks aktualisiert)
+    process_all_groups_with_progress(progress_label, progress_bar)
+
+    # Kurze Erfolgsmeldung
+    progress_label.config(text="Aktualisierung abgeschlossen.")
+    root.update_idletasks()
+    # kleine Verzögerung damit der User das Ende sieht
+    root.after(400)
+
+    # Progress-Frame entfernen und GUI neu aufbauen
+    for w in frame.winfo_children():
+        w.destroy()
+    update_gui()
+
 def ueberspringen(ueberspringen_name, todo_status_datei):
-    """Markiert das erste offene ToDo als 'Übersprungen' in der JSON-Datei."""
+    """Markiert das erste offene ToDo als 'Übersprungen' in der JSON-Datei und zeigt Progress."""
     try:
         with open(todo_status_datei, 'r+', encoding='utf-8') as f:
             daten = json.load(f)
@@ -655,11 +843,12 @@ def ueberspringen(ueberspringen_name, todo_status_datei):
             f.truncate()
     except Exception as e:
         print(f"Fehler beim Überspringen für {ueberspringen_name}: {e}")
-    # GUI aktualisieren (bindet wieder korrekte lokale Variablen beim Neuaufbau)
-    update_gui()
+
+    # Fortschritt direkt in update_gui anzeigen (kein doppelter Lauf)
+    update_gui(show_progress=True)
 
 def rueckgaengig_machen(rueckgaengig_name, todo_status_datei):
-    """Setzt das zuletzt abgeschlossene/übersprungene ToDo zurück auf offen (None)."""
+    """Setzt das zuletzt abgeschlossene/übersprungene ToDo zurück auf offen (None) und zeigt Progress."""
     try:
         with open(todo_status_datei, 'r+', encoding='utf-8') as f:
             daten = json.load(f)
@@ -672,7 +861,9 @@ def rueckgaengig_machen(rueckgaengig_name, todo_status_datei):
             f.truncate()
     except Exception as e:
         print(f"Fehler beim Rückgängig machen für {rueckgaengig_name}: {e}")
-    update_gui()
+
+    # Fortschritt direkt in update_gui anzeigen (kein doppelter Lauf)
+    update_gui(show_progress=True)
 
 todo_functions = {"Backup Mitarbeiter:in finden": backup,
                   "Mögliche Termine für GGG finden und mit Initiator:in vereinbaren": termin_GGG,
@@ -743,9 +934,7 @@ def hauptschleife():
 
         letzte_meldungen[gruppenname] = meldung  # Merken für die GUI
         
-while __name__ == "__main__":
-    # Starte initiales Update
-    update_gui()
-
-    # Starte Hauptloop
+if __name__ == "__main__":
+    # Starte initiales Update mit Fortschrittsanzeige nachdem die GUI gestartet ist
+    root.after(0, lambda: update_gui(show_progress=True))
     root.mainloop()

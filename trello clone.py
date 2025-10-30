@@ -575,9 +575,42 @@ def fragebogen2(Ordnername, i):
 
 root = tk.Tk()
 root.title("Aufgabenstatus")
+# setze anfängliche Fenstergröße (Breite x Höhe)
+root.geometry("1350x675")  # feste Startgröße
 
-frame = tk.Frame(root)
-frame.pack(expand=True, fill='both')
+# Container mit Canvas + horizontalem Scrollbar
+container = tk.Frame(root)
+container.pack(fill='both', expand=True)
+
+canvas = tk.Canvas(container, highlightthickness=0)
+h_scroll = tk.Scrollbar(container, orient='horizontal', command=canvas.xview)
+canvas.configure(xscrollcommand=h_scroll.set)
+
+# Pack: Scrollbar unten, Canvas füllt den Rest
+h_scroll.pack(side='bottom', fill='x')
+canvas.pack(side='top', fill='both', expand=True)
+
+# Inneres Frame, in das die existierenden Gruppen-Frames eingefügt werden.
+# Behalte den Namen `frame`, damit vorhandener Code unverändert weiterarbeitet.
+frame = tk.Frame(canvas)
+canvas_window = canvas.create_window((0, 0), window=frame, anchor='nw')
+
+def _on_frame_configure(event):
+    # Scrollregion anpassen wenn inneres Frame sich ändert
+    canvas.configure(scrollregion=canvas.bbox('all'))
+
+frame.bind("<Configure>", _on_frame_configure)
+
+# Optional: horizontal mit Shift+Mausrad scrollen (Windows/Linux)
+def _shift_mousewheel(event):
+    # event.delta ist in Windows ein Vielfaches von 120
+    try:
+        canvas.xview_scroll(int(-1 * (event.delta / 120)), "units")
+    except Exception:
+        # Fallback: Linux/Mac (button 4/5) nicht behandelt hier
+        pass
+
+root.bind_all("<Shift-MouseWheel>", _shift_mousewheel)
 
 baum_pro_gruppe = {}
 
@@ -660,6 +693,8 @@ def update_gui(show_progress=False):
             remaining = total - done
             progress_bar['maximum'] = total
             progress_bar['value'] = done
+            progress_label.config(text=" ")       # kurz leeren
+            progress_label.update_idletasks()    # Redraw erzwingen
             progress_label.config(text=f"Aktualisiert: {done}/{total} — verbleibend: {remaining}\n {gruppenname}")
             root.update_idletasks()
 
@@ -690,7 +725,7 @@ def update_gui(show_progress=False):
         label = tk.Label(gruppen_frame, text=f"{Titel}\n{MA}", font=("Arial", 12, "bold"))
         label.pack()
 
-        tree = ttk.Treeview(gruppen_frame, columns=("Aufgabe", "Status"), show="headings", height=20)
+        tree = ttk.Treeview(gruppen_frame, columns=("Aufgabe", "Status"), show="headings", height=24)
         tree.heading("Aufgabe", text="Aufgabe")
         tree.heading("Status", text="Status")
         tree.column("Aufgabe", width=150)

@@ -547,6 +547,15 @@ def anwesenheit3(Ordnername, i):
     else:
         return f"warten bis drittes Treffen am {df.iloc[21, 1].strftime('%d.%m.%Y')} stattgefunden hat!"
 
+def gruppenbesuch(Ordnername, i):
+    frage_text = "Wurde die Gruppe bereits besucht?"
+    antwort = frage_mit_tkinter(Ordnername, frage_text)
+
+    if antwort == "ja":
+        i[1] = datetime.now().date()
+    elif antwort == "nein":
+        return "Gruppenbesuch vereinbaren!"
+
 def fragebogen2(Ordnername, i):
     # Ist ein Wert in Zelle B57 eingetragen?
     if pd.notna(df.iloc[55, 1]):
@@ -887,6 +896,7 @@ todo_functions = {"Backup Mitarbeiter:in finden": backup,
                   "Interessent:innen informieren3": infoTreffen3,
                   "Initiator:in Fragebogen zukommen lassen": fragebogen1,
                   "Anwesenheiten notieren3": anwesenheit3,
+                  "Gruppe besuchen": gruppenbesuch,
                   "Fragebogen zurückerhalten und in Datenbank einpflegen": fragebogen2
                 }
 

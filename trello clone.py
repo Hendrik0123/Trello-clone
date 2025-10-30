@@ -59,6 +59,9 @@ def finde_ordner_nach_namen(verzeichnis):
     Der Benutzer wählt anschließend, nach welchem Namen gefiltert werden soll.
     Gibt eine Liste von Tupeln (Ordnername, Typ) zurück.
     """
+    import os, re, tkinter as tk
+    from tkinter import ttk
+
     ordner = []
     namen_gefunden = set()
     muster = re.compile(r"\(([^)]+)\)", re.IGNORECASE)
@@ -69,8 +72,7 @@ def finde_ordner_nach_namen(verzeichnis):
         if os.path.isdir(pfad):
             match = muster.search(name)
             if match:
-                # Namen normalisieren und prüfen
-                gefundene_namen = re.split(r"\+|&|und", match.group(1))  # Trennen bei "+", "&", "und"
+                gefundene_namen = re.split(r"\+|&|und", match.group(1))
                 for einzelner_name in gefundene_namen:
                     normalisierter_name = einzelner_name.strip().lower()
                     if normalisierter_name not in {n.lower() for n in namen_gefunden}:
@@ -81,11 +83,15 @@ def finde_ordner_nach_namen(verzeichnis):
         print("Keine Namen in Klammern gefunden.")
         return []
 
+    # 🔸 "Alle" hinzufügen
+    namen_liste = sorted(namen_gefunden)
+    namen_liste.insert(0, "Alle")
+
     # Tkinter-Fenster für die Auswahl
     def auswahl_treffen():
         nonlocal gewaehlter_name
         gewaehlter_name = auswahl_var.get()
-        auswahl_fenster.quit()  # Beendet den Hauptloop
+        auswahl_fenster.quit()
 
     gewaehlter_name = None
     auswahl_fenster = tk.Tk()
@@ -93,17 +99,16 @@ def finde_ordner_nach_namen(verzeichnis):
 
     tk.Label(auswahl_fenster, text="Bitte einen Namen auswählen:", font=("Arial", 12)).pack(pady=10)
 
-    namen_liste = sorted(namen_gefunden)
     auswahl_var = tk.StringVar(auswahl_fenster)
-    auswahl_var.set(namen_liste[0])  # Standardwert setzen
+    auswahl_var.set(namen_liste[0])  # Standardwert ("Alle")
 
     dropdown = ttk.Combobox(auswahl_fenster, textvariable=auswahl_var, values=namen_liste, state="readonly")
     dropdown.pack(pady=10)
 
     tk.Button(auswahl_fenster, text="Auswählen", command=auswahl_treffen).pack(pady=10)
 
-    auswahl_fenster.mainloop()  # Startet den Hauptloop
-    auswahl_fenster.destroy()  # Zerstört das Fenster nach dem Beenden des Hauptloops
+    auswahl_fenster.mainloop()
+    auswahl_fenster.destroy()
 
     if not gewaehlter_name:
         print("Keine Auswahl getroffen. Abbruch.")
@@ -114,12 +119,14 @@ def finde_ordner_nach_namen(verzeichnis):
         pfad = os.path.join(verzeichnis, name)
         if os.path.isdir(pfad):
             match = muster.search(name)
-            if match and gewaehlter_name.lower() in match.group(1).lower():
+            if match:
                 zwischen = match.group(1)
-                if "+" in zwischen:
-                    ordner.append((name, "sekundär"))
-                else:
-                    ordner.append((name, "primär"))
+                # 🔸 Wenn "Alle" gewählt wurde → alles aufnehmen
+                if gewaehlter_name == "Alle" or gewaehlter_name.lower() in zwischen.lower():
+                    if "+" in zwischen:
+                        ordner.append((name, "sekundär"))
+                    else:
+                        ordner.append((name, "primär"))
 
     return ordner
 

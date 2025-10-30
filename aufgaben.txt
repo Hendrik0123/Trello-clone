@@ -20,4 +20,5 @@ Konferenzraum Reservieren3
 Interessent:innen informieren3
 Initiator:in Fragebogen zukommen lassen
 Anwesenheiten notieren3
+Gruppe besuchen
 Fragebogen zurückerhalten und in Datenbank einpflegen
